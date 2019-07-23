@@ -55,7 +55,10 @@ public final class GameBoyUtils {
             io.setVolatile(true);
         }
         createUninitializedBlock(program, false, "hram", as.getAddress(0xff80), 0x7f, "", source, true, true, true, log);
-        createUninitializedBlock(program, false, "ie", as.getAddress(0xffff), 0x1, "", source, true, true, false, log);
+        var ie = createUninitializedBlock(program, false, "ie", as.getAddress(0xffff), 0x1, "", source, true, true, false, log);
+        if (ie != null) {
+            ie.setVolatile(true);
+        }
     }
 
     public static void populateHardwareBlocks(Program program, GameBoyKind kind) throws CodeUnitInsertionException, InvalidInputException {
