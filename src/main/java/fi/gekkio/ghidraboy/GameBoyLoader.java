@@ -1,0 +1,150 @@
+// Copyright 2019 Joonas Javanainen <joonas.javanainen@gmail.com>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+package fi.gekkio.ghidraboy;
+
+import ghidra.app.util.MemoryBlockUtils;
+import ghidra.app.util.Option;
+import ghidra.app.util.OptionUtils;
+import ghidra.app.util.bin.ByteProvider;
+import ghidra.app.util.importer.MessageLog;
+import ghidra.app.util.opinion.AbstractProgramLoader;
+import ghidra.app.util.opinion.LoadSpec;
+import ghidra.app.util.opinion.LoaderTier;
+import ghidra.framework.model.DomainFolder;
+import ghidra.framework.model.DomainObject;
+import ghidra.program.model.address.AddressOverflowException;
+import ghidra.program.model.lang.LanguageCompilerSpecPair;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.exception.InvalidInputException;
+import ghidra.util.task.TaskMonitor;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static fi.gekkio.ghidraboy.BootRomUtils.detectBootRom;
+import static fi.gekkio.ghidraboy.GameBoyUtils.addHardwareBlocks;
+import static ghidra.app.util.MemoryBlockUtils.createInitializedBlock;
+import static ghidra.app.util.MemoryBlockUtils.createUninitializedBlock;
+
+public class GameBoyLoader extends AbstractProgramLoader {
+    private static final String OPT_HW_BLOCKS = "Create GB hardware memory blocks";
+    private static final String OPT_KIND = "Hardware type";
+
+    @Override
+    public String getName() {
+        return "Game Boy";
+    }
+
+    @Override
+    public LoaderTier getTier() {
+        return LoaderTier.SPECIALIZED_TARGET_LOADER;
+    }
+
+    @Override
+    public int getTierPriority() {
+        return 0;
+    }
+
+    @Override
+    public boolean supportsLoadIntoProgram() {
+        return true;
+    }
+
+    @Override
+    public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
+        var result = new ArrayList<LoadSpec>();
+        if (detectBootRom(provider).isPresent()) {
+            result.add(new LoadSpec(this, 0, new LanguageCompilerSpecPair("SM83:LE:16:default", "default"), true));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject, boolean isLoadIntoProgram) {
+        var result = super.getDefaultOptions(provider, loadSpec, domainObject, isLoadIntoProgram);
+        result.add(new Option(OPT_HW_BLOCKS, true));
+        try {
+            var bootRom = detectBootRom(provider);
+            if (bootRom.isPresent()) {
+                result.add(new GameBoyKindOption(OPT_KIND, bootRom.get()));
+                return result;
+            }
+        } catch (IOException e) {
+        }
+        result.add(new GameBoyKindOption(OPT_KIND, GameBoyKind.GB));
+        return result;
+    }
+
+    @Override
+    protected List<Program> loadProgram(ByteProvider provider, String programName, DomainFolder programFolder, LoadSpec loadSpec, List<Option> options, MessageLog log, Object consumer, TaskMonitor monitor) throws IOException, CancelledException {
+        var result = new ArrayList<Program>();
+        var pair = loadSpec.getLanguageCompilerSpec();
+        var language = getLanguageService().getLanguage(pair.languageID);
+        var compiler = language.getCompilerSpecByID(pair.compilerSpecID);
+
+        var baseAddress = language.getAddressFactory().getDefaultAddressSpace().getAddress(0);
+        var program = createProgram(provider, programName, baseAddress, getName(), language, compiler, consumer);
+        var success = false;
+        try {
+            if (loadInto(provider, loadSpec, options, log, program, monitor)) {
+                createDefaultMemoryBlocks(program, language, log);
+
+                if (OptionUtils.getBooleanOptionValue(OPT_HW_BLOCKS, options, true)) {
+                    int id = program.startTransaction("Create GB hardware memory blocks");
+                    var kind = OptionUtils.getOption(OPT_KIND, options, GameBoyKind.GB);
+                    try {
+                        addHardwareBlocks(program, kind, log);
+                    } finally {
+                        program.endTransaction(id, true);
+                    }
+                }
+                success = result.add(program);
+            }
+        } finally {
+            if (!success) {
+                program.release(consumer);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    protected boolean loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor) throws IOException, CancelledException {
+        var bootRom = detectBootRom(provider);
+        if (bootRom.isPresent()) {
+            var rom = MemoryBlockUtils.createFileBytes(program, provider);
+            var cgb = GameBoyKind.CGB.equals(bootRom.get());
+            var as = program.getAddressFactory().getDefaultAddressSpace();
+            try {
+                createInitializedBlock(program, false, cgb ? "boot0" : "boot", as.getAddress(0x0000), rom, 0, 0x100, "", getName(), false, false, true, log);
+                createUninitializedBlock(program, false, "rom", as.getAddress(0x0100), 0x50, "", getName(), true, false, false, log);
+                if (cgb) {
+                    createInitializedBlock(program, false, "boot1", as.getAddress(0x0200), rom, 0x200, 0x700, "", getName(), false, false, true, log);
+                }
+                var st = program.getSymbolTable();
+                st.addExternalEntryPoint(as.getAddress(0x0000));
+                st.createLabel(as.getAddress(0x0000), "boot_entry", SourceType.IMPORTED);
+            } catch (AddressOverflowException | InvalidInputException e) {
+                log.appendException(e);
+                throw new CancelledException("Loading failed: " + e.getMessage());
+            }
+        }
+        return true;
+    }
+
+}
