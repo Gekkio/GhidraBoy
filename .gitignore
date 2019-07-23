@@ -1,0 +1,13 @@
+*.bak
+*.log
+*.tmp
+*.swp
+*~
+.idea/
+.gradle/
+build/
+dist/
+
+gradle/wrapper/gradle-wrapper.jar
+
+*.sla

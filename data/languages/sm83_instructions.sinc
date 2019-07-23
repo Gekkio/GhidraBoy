@@ -1,0 +1,540 @@
+# Copyright 2019 Joonas Javanainen <joonas.javanainen@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# 8-bit loads
+
+:LD reg3_3, reg0_3 is op6_2=0b01 & reg3_3 & reg0_3 {
+  reg3_3 = reg0_3;
+}
+
+:LD reg3_3, imm8 is op6_2=0b00 & reg3_3 & op0_3=0b110; imm8 {
+  reg3_3 = imm8;
+}
+
+:LD reg3_3, (HL) is op6_2=0b01 & reg3_3 & op0_3=0b110 & HL {
+  reg3_3 = *:1 HL;
+}
+
+:LD (HL), reg0_3 is op6_2=0b01 & op3_3=0b110 & reg0_3 & HL {
+  *:1 HL = reg0_3;
+}
+
+:LD (HL), imm8 is op0_8=0x36 & HL; imm8 {
+  *:1 HL = imm8;
+}
+
+:LD A, (BC) is op0_8=0x0a & A & BC {
+  A = *:1 BC;
+}
+
+:LD A, (DE) is op0_8=0x1a & A & DE {
+  A = *:1 DE;
+}
+
+:LD A, CMem8 is op0_8=0xf2 & A & CMem8 {
+  A = CMem8;
+}
+
+:LD CMem8, A is op0_8=0xe2 & A & CMem8 {
+  CMem8 = A;
+}
+
+:LDH A, HiMem8 is op0_8=0xf0 & A; HiMem8 {
+  A = HiMem8;
+}
+
+:LDH HiMem8, A is op0_8=0xe0 & A; HiMem8 {
+  HiMem8 = A;
+}
+
+:LD A, Mem8 is op0_8=0xfa & A; Mem8 {
+  A = Mem8;
+}
+
+:LD Mem8, A is op0_8=0xea & A; Mem8 {
+  Mem8 = A;
+}
+
+:LD A, HLInc is op0_8=0x2a & A & HLInc {
+  A = HLInc;
+}
+
+:LD A, HLDec is op0_8=0x3a & A & HLDec {
+  A = HLDec;
+}
+
+:LD (BC), A is op0_8=0x02 & A & BC {
+  *:1 BC = A;
+}
+
+:LD (DE), A is op0_8=0x12 & A & DE {
+  *:1 DE = A;
+}
+
+:LD HLInc, A is op0_8=0x22 & A & HLInc {
+  HLInc = A;
+}
+
+:LD HLDec, A is op0_8=0x32 & A & HLDec {
+  HLDec = A;
+}
+
+# 8-bit arithmetic
+
+:ADD reg0_3 is op6_2=0b10 & op3_3=0b000 & reg0_3 {
+  aluAdd(reg0_3);
+}
+
+:ADD imm8 is op0_8=0xc6; imm8 {
+  aluAdd(imm8);
+}
+
+:ADD (HL) is op0_8=0x86 & HL {
+  local val:1 = *:1 HL;
+  aluAdd(val);
+}
+
+:ADC reg0_3 is op6_2=0b10 & op3_3=0b001 & reg0_3 {
+  aluAdc(reg0_3);
+}
+
+:ADC imm8 is op0_8=0xce; imm8 {
+  aluAdc(imm8);
+}
+
+:ADC (HL) is op0_8=0x8e & HL {
+  local val:1 = *:1 HL;
+  aluAdc(val);
+}
+
+:SUB reg0_3 is op6_2=0b10 & op3_3=0b010 & reg0_3 {
+  aluSub(reg0_3);
+}
+
+:SUB imm8 is op0_8=0xd6; imm8 {
+  aluSub(imm8);
+}
+
+:SUB (HL) is op0_8=0x96 & HL {
+  local val:1 = *:1 HL;
+  aluSub(val);
+}
+
+:SBC reg0_3 is op6_2=0b10 & op3_3=0b011 & reg0_3 {
+  aluSbc(reg0_3);
+}
+
+:SBC imm8 is op0_8=0xde; imm8 {
+  aluSbc(imm8);
+}
+
+:SBC (HL) is op0_8=0x9e & HL {
+  local val:1 = *:1 HL;
+  aluSbc(val);
+}
+
+:AND reg0_3 is op6_2=0b10 & op3_3=0b100 & reg0_3 {
+  aluAnd(reg0_3);
+}
+
+:AND imm8 is op0_8=0xe6; imm8 {
+  aluAnd(imm8);
+}
+
+:AND (HL) is op0_8=0xa6 & HL {
+  local val:1 = *:1 HL;
+  aluAnd(val);
+}
+
+:XOR reg0_3 is op6_2=0b10 & op3_3=0b101 & reg0_3 {
+  aluXor(reg0_3);
+}
+
+:XOR imm8 is op0_8=0xee; imm8 {
+  aluXor(imm8);
+}
+
+:XOR (HL) is op0_8=0xae & HL {
+  local val:1 = *:1 HL;
+  aluXor(val);
+}
+
+:OR reg0_3 is op6_2=0b10 & op3_3=0b110 & reg0_3 {
+  aluOr(reg0_3);
+}
+
+:OR imm8 is op0_8=0xf6; imm8 {
+  aluOr(imm8);
+}
+
+:OR (HL) is op0_8=0xb6 & HL {
+  local val:1 = *:1 HL;
+  aluOr(val);
+}
+
+:CP reg0_3 is op6_2=0b10 & op3_3=0b111 & reg0_3 {
+  aluCp(reg0_3);
+}
+
+:CP imm8 is op0_8=0xfe; imm8 {
+  aluCp(imm8);
+}
+
+:CP (HL) is op0_8=0xbe & HL {
+  local val:1 = *:1 HL;
+  aluCp(val);
+}
+
+:INC reg3_3 is op6_2=0b00 & reg3_3 & op0_3=0b100 {
+  aluInc(reg3_3);
+}
+
+:INC (HL) is op0_8=0x34 & HL {
+  local val:1 = *:1 HL;
+  aluInc(val);
+}
+
+:DEC reg3_3 is op6_2=0b00 & reg3_3 & op0_3=0b101 {
+  aluDec(reg3_3);
+}
+
+:DEC (HL) is op0_8=0x35 & HL {
+  local val:1 = *:1 HL;
+  aluDec(val);
+}
+
+:RLCA is op0_8=0x07 {
+  # TODO: double-check flags
+  local co:1 = (A >> 7);
+  A = (A << 1) | co;
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+}
+
+:RLA is op0_8=0x17 {
+  # TODO: double-check flags
+  local co:1 = (A >> 7);
+  A = (A << 1) | $(C_flag);
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+}
+
+:RRCA is op0_8=0x0f {
+  # TODO: double-check flags
+  local co:1 = A & 1;
+  A = (A >> 1) | (co << 7);
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+}
+
+:RRA is op0_8=0x1f {
+  # TODO: double-check flags
+  local co:1 = A & 1;
+  A = (A >> 1) | ($(C_flag) << 7);
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+}
+
+:RLC reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b000 & reg0_3 {
+  aluRlc(reg0_3);
+}
+
+:RLC (HL) is op0_8=0xcb & HL; op0_8=0x06 {
+  local val:1 = *:1 HL;
+  aluRlc(val);
+  *:1 HL = val;
+}
+
+:RRC reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b001 & reg0_3 {
+  aluRrc(reg0_3);
+}
+
+:RRC (HL) is op0_8=0xcb & HL; op0_8=0x0e {
+  local val:1 = *:1 HL;
+  aluRrc(val);
+  *:1 HL = val;
+}
+
+:RL reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b010 & reg0_3 {
+  aluRl(reg0_3);
+}
+
+:RL (HL) is op0_8=0xcb & HL; op0_8=0x16 {
+  local val:1 = *:1 HL;
+  aluRl(val);
+  *:1 HL = val;
+}
+
+:RR reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b011 & reg0_3 {
+  aluRr(reg0_3);
+}
+
+:RR (HL) is op0_8=0xcb & HL; op0_8=0x1e {
+  local val:1 = *:1 HL;
+  aluRr(val);
+  *:1 HL = val;
+}
+
+:SLA reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b100 & reg0_3 {
+  aluSla(reg0_3);
+}
+
+:SLA (HL) is op0_8=0xcb & HL; op0_8=0x26 {
+  local val:1 = *:1 HL;
+  aluSla(val);
+  *:1 HL = val;
+}
+
+:SRA reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b101 & reg0_3 {
+  aluSra(reg0_3);
+}
+
+:SRA (HL) is op0_8=0xcb & HL; op0_8=0x2e {
+  local val:1 = *:1 HL;
+  aluSra(val);
+  *:1 HL = val;
+}
+
+:SWAP reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b110 & reg0_3 {
+  aluSwap(reg0_3);
+}
+
+:SWAP (HL) is op0_8=0xcb & HL; op0_8=0x36 {
+  local val:1 = *:1 HL;
+  aluSwap(val);
+  *:1 HL = val;
+}
+
+:SRL reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b111 & reg0_3 {
+  aluSrl(reg0_3);
+}
+
+:SRL (HL) is op0_8=0xcb & HL; op0_8=0x3e {
+  local val:1 = *:1 HL;
+  aluSrl(val);
+  *:1 HL = val;
+}
+
+:BIT bit3_3, reg0_3 is op0_8=0xcb; op6_2=0b01 & bit3_3 & reg0_3 {
+  aluBit(bit3_3, reg0_3);
+}
+
+:BIT bit3_3, (HL) is op0_8=0xcb & HL; op6_2=0b01 & bit3_3 & op0_3=0b110 {
+  local val:1 = *:1 HL;
+  aluBit(bit3_3, val);
+}
+
+:RES bit3_3, reg0_3 is op0_8=0xcb; op6_2=0b10 & bit3_3 & reg0_3 {
+  aluRes(bit3_3, reg0_3);
+}
+
+:RES bit3_3, (HL) is op0_8=0xcb & HL; op6_2=0b10 & bit3_3 & op0_3=0b110 {
+  local val:1 = *:1 HL;
+  aluRes(bit3_3, val);
+  *:1 HL = val;
+}
+
+:SET bit3_3, reg0_3 is op0_8=0xcb; op6_2=0b11 & bit3_3 & reg0_3 {
+  aluSet(bit3_3, reg0_3);
+}
+
+:SET bit3_3, (HL) is op0_8=0xcb & HL; op6_2=0b11 & bit3_3 & op0_3=0b110 {
+  local val:1 = *:1 HL;
+  aluSet(bit3_3, val);
+  *:1 HL = val;
+}
+
+# Control
+
+:JP Addr16 is op0_8=0xc3; Addr16 {
+  goto Addr16;
+}
+
+:JP HL is op0_8=0xe9 & HL {
+  goto [HL];
+}
+
+:JR RelAddr8 is op0_8=0x18; RelAddr8 {
+  goto RelAddr8;
+}
+
+:CALL Addr16 is op0_8=0xcd; Addr16 {
+  push16(&:2 inst_next);
+  call Addr16;
+}
+
+:RET is op0_8=0xc9 {
+  pop16(PC);
+  return [PC];
+}
+
+:RETI is op0_8=0xd9 {
+  pop16(PC);
+  local ime:1 = 1;
+  IME(ime);
+  return [PC];
+}
+
+:JP cc, Addr16 is op5_3=0b110 & cc & op0_3=0b010; Addr16 {
+  if (cc) goto Addr16;
+}
+
+:JR cc, RelAddr8 is op5_3=0b001 & cc & op0_3=0b000; RelAddr8 {
+  if (cc) goto RelAddr8;
+}
+
+:CALL cc, Addr16 is op5_3=0b110 & cc & op0_3=0b100; Addr16 {
+  if (!cc) goto inst_next;
+  push16(&:2 inst_next);
+  call Addr16;
+}
+
+:RET cc is op5_3=0b110 & cc & op0_3=0b000 {
+  if (!cc) goto inst_next;
+  pop16(PC);
+  return [PC];
+}
+
+:RST RstAddr is op6_2=0b11 & RstAddr & op0_3=0b111 {
+  push16(&:2 inst_next);
+  call RstAddr;
+}
+
+# Miscellaneous
+
+:HALT is op0_8=0x76 {
+  halt();
+}
+
+:STOP is op0_8=0x10 {
+  stop();
+  PC = PC + 1;
+  goto [PC];
+}
+
+:DI is op0_8=0xf3 {
+  local ime:1 = 0;
+  IME(ime);
+}
+
+:EI is op0_8=0xfb {
+  local ime:1 = 1;
+  IME(ime);
+}
+
+:CCF is op0_8=0x3f {
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = !$(C_flag);
+}
+
+:SCF is op0_8=0x37 {
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 1;
+}
+
+:NOP is op0_8=0x00 {
+}
+
+:DAA is op0_8=0x27 {
+  A = daa(A);
+}
+
+:CPL is op0_8=0x2f {
+  A = ~A;
+  $(N_flag) = 1;
+  $(H_flag) = 1;
+}
+
+# 16-bit loads
+
+:LD dregpair4_2, imm16 is op6_2=0b00 & dregpair4_2 & op0_4=0b0001; imm16 {
+  dregpair4_2 = imm16;
+}
+
+:LD Mem16, SP is op0_8=0x08 & SP; Mem16 {
+  Mem16 = SP;
+}
+
+:LD SP, HL is op0_8=0xf9 & SP & HL {
+  SP = HL;
+}
+
+:LD HL, SP+simm8 is op0_8=0xf8 & HL & SP; simm8 {
+  # TODO: double-check flags
+  local tmp:2 = SP + simm8;
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = carry(SP:1, simm8);
+  HL = tmp;
+}
+
+:LD HL, SP-val is op0_8=0xf8 & HL & SP; simm8 & sign8=1 [
+  val = -simm8;
+] {
+  # TODO: double-check flags
+  local tmp:2 = SP + simm8;
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = carry(SP:1, simm8);
+  HL = tmp;
+}
+
+:PUSH qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0101 {
+  push16(qregpair4_2);
+}
+
+:POP qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0001 {
+  pop16(qregpair4_2);
+}
+
+# 16-bit arithmetic
+
+:ADD HL, sregpair4_2 is op6_2=0b00 & sregpair4_2 & op0_4=0b1001 & HL {
+  # TODO: double-check flags
+  local tmp:2 = HL + sregpair4_2;
+  $(N_flag) = 0;
+  $(H_flag) = (((HL & 0xfff) + (sregpair4_2 & 0xfff)) & 0x1000) != 0;
+  $(C_flag) = carry(HL, sregpair4_2);
+  HL = tmp;
+}
+
+:ADD SP, simm8 is op0_8=0xe8 & SP; simm8 {
+  # TODO: double-check flags
+  local tmp:2 = SP + simm8;
+  $(Z_flag) = 0;
+  $(N_flag) = 0;
+  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = carry(SP:1, simm8);
+  SP = tmp;
+}
+
+:INC sregpair4_2 is op6_2=0b00 & sregpair4_2 & op0_4=0b0011 {
+  sregpair4_2 = sregpair4_2 + 1;
+}
+
+:DEC sregpair4_2 is op6_2=0b00 & sregpair4_2 & op0_4=0b1011 {
+  sregpair4_2 = sregpair4_2 - 1;
+}

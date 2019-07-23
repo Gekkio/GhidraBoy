@@ -1,0 +1,347 @@
+# Copyright 2019 Joonas Javanainen <joonas.javanainen@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+define endian = little;
+define alignment = 1;
+define space ram type=ram_space size=2 default;
+define space register type=register_space size=1;
+
+define register offset=0x00 size=1 [ F A C B E D L H ];
+define register offset=0x00 size=2 [ AF  BC  DE  HL ];
+define register offset=0x08 size=2 [ PC  SP  ];
+
+@define C_flag "F[4,1]"
+@define H_flag "F[5,1]"
+@define N_flag "F[6,1]"
+@define Z_flag "F[7,1]"
+
+define token opcode (8)
+  op0_8       = (0,7)
+  op0_4       = (0,3)
+  op0_3       = (0,2)
+  reg0_3      = (0,2)
+  op3_1       = (3,3)
+  op3_2       = (3,4)
+  op3_3       = (3,5)
+  reg3_3      = (3,5)
+  bit3_3      = (3,5)
+  qregpair4_2 = (4,5)
+  dregpair4_2 = (4,5)
+  sregpair4_2 = (4,5)
+  op5_3       = (5,7)
+  op6_2       = (6,7)
+;
+
+define token data8 (8)
+  imm8  = (0,7)
+  sign8 = (7,7)
+  simm8 = (0,7) signed
+;
+
+define token data16 (16)
+  imm16 = (0,15)
+;
+
+attach variables [ reg0_3 reg3_3 ] [ B C D E H L _ A ];
+attach variables [ sregpair4_2 dregpair4_2 ] [ BC DE HL SP ];
+attach variables [ qregpair4_2 ] [ BC DE HL AF ];
+
+cc: "NZ" is op3_2=0b00 {
+  local c:1 = ($(Z_flag) == 0);
+  export c;
+}
+cc: "Z"  is op3_2=0b01 {
+  local c:1 = $(Z_flag);
+  export c;
+}
+cc: "NC" is op3_2=0b10 {
+  local c:1 = ($(C_flag) == 0);
+  export c;
+}
+cc: "C"  is op3_2=0b11 {
+  local c:1 = $(C_flag);
+  export c;
+}
+
+Addr16: imm16 is imm16 {
+  export *:1 imm16;
+}
+
+Mem8: (imm16) is imm16 {
+  export *:1 imm16;
+}
+
+Mem16: (imm16) is imm16 {
+  export *:2 imm16;
+}
+
+RelAddr8: loc is simm8 [
+  loc = inst_next + simm8;
+] {
+  export *:1 loc;
+}
+
+RstAddr: loc is op3_3 [
+  loc = op3_3 << 3;
+] {
+  export *:1 loc;
+}
+
+HLInc: (HL+) is HL {
+  local tmp = HL;
+  HL = HL + 1;
+  export *:1 tmp;
+}
+
+HLDec: (HL-) is HL {
+  local tmp = HL;
+  HL = HL - 1;
+  export *:1 tmp;
+}
+
+CMem8: (C) is C {
+  local ptr:2 = 0xff00 | zext(C);
+  export *:1 ptr;
+}
+
+HiMem8: (imm8) is imm8 {
+  local off:1 = imm8;
+  local ptr:2 = 0xff00 | zext(off);
+  export *:1 ptr;
+}
+
+define pcodeop IME;
+define pcodeop daa;
+define pcodeop halt;
+define pcodeop stop;
+
+macro push16(val16) {
+  SP = SP - 2;
+  *:2 SP = val16;
+}
+
+macro pop16(ret16) {
+  ret16 = *:2 SP;
+  SP = SP + 2;
+}
+
+macro aluAdd(op8) {
+  # TODO: double-check flags
+  local tmp:1 = A + op8;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = (((A & 0xf) + (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = carry(A, op8);
+  A = tmp;
+}
+
+macro aluAdc(op8) {
+  # TODO: double-check flags
+  local cy = $(C_flag);
+  local tmp:1 = A + op8;
+  $(N_flag) = 0;
+  $(H_flag) = (((A & 0xf) + (op8 & 0xf) + cy) & 0x10) != 0;
+  $(C_flag) = carry(A, op8);
+  A = tmp + cy;
+  $(Z_flag) = (A == 0);
+  $(C_flag) = $(C_flag) || carry(tmp, cy);
+}
+
+macro aluSub(op8) {
+  # TODO: double-check flags
+  local tmp:1 = A - op8;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = A < op8;
+  A = tmp;
+}
+
+macro aluSbc(op8) {
+  # TODO: double-check flags
+  local cy = $(C_flag);
+  local tmp:1 = A - op8;
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf) - cy) & 0x10) != 0;
+  $(C_flag) = A < op8;
+  A = tmp - cy;
+  $(Z_flag) = (A == 0);
+  $(C_flag) = $(C_flag) || (tmp < cy);
+}
+
+macro aluAnd(op8) {
+  # TODO: double-check flags
+  A = A & op8;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 1;
+  $(C_flag) = 0;
+}
+
+macro aluXor(op8) {
+  # TODO: double-check flags
+  A = A ^ op8;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
+}
+
+macro aluOr(op8) {
+  # TODO: double-check flags
+  A = A | op8;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
+}
+
+macro aluCp(op8) {
+  # TODO: double-check flags
+  local tmp:1 = A - op8;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = A < op8;
+}
+
+macro aluInc(op8) {
+  # TODO: double-check flags
+  local tmp:1 = op8 + 1;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = ((op8 & 0xf) == 0xf);
+  op8 = tmp;
+}
+
+macro aluDec(op8) {
+  # TODO: double-check flags
+  local tmp:1 = op8 - 1;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = ((op8 & 0xf) == 0);
+  op8 = tmp;
+}
+
+macro aluRlc(op8) {
+  # TODO: double-check flags
+  local co:1 = (op8 >> 7);
+  local tmp:1 = (op8 << 1) | co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluRrc(op8) {
+  # TODO: double-check flags
+  local co:1 = op8 & 1;
+  local tmp:1 = (op8 >> 1) | (co << 7);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluRl(op8) {
+  # TODO: double-check flags
+  local co:1 = (op8 >> 7);
+  local tmp:1 = (op8 << 1) | $(C_flag);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluRr(op8) {
+  # TODO: double-check flags
+  local co:1 = op8 & 1;
+  local tmp:1 = (op8 >> 1) | ($(C_flag) << 7);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluSla(op8) {
+  # TODO: double-check flags
+  local co:1 = op8 >> 7;
+  local tmp:1 = op8 << 1;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluSra(op8) {
+  # TODO: double-check flags
+  local co:1 = op8 & 1;
+  local tmp:1 = op8 s>> 1;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluSwap(op8) {
+  # TODO: double-check flags
+  local tmp:1 = (op8 >> 4) | (op8 << 4);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
+  op8 = tmp;
+}
+
+macro aluSrl(op8) {
+  # TODO: double-check flags
+  local co:1 = op8 & 1;
+  local tmp:1 = op8 >> 1;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
+  op8 = tmp;
+}
+
+macro aluBit(bit, op8) {
+  # TODO: double-check flags
+  local mask:1 = (1 << bit);
+  local tmp:1 = op8;
+  $(Z_flag) = ((tmp & mask) == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 1;
+}
+
+macro aluRes(bit, op8) {
+  # TODO: double-check flags
+  local mask:1 = ~(1 << bit);
+  local tmp:1 = op8;
+  tmp = tmp & mask;
+  op8 = tmp;
+}
+
+macro aluSet(bit, op8) {
+  # TODO: double-check flags
+  local mask:1 = (1 << bit);
+  local tmp:1 = op8;
+  tmp = tmp | mask;
+  op8 = tmp;
+}
