@@ -2,6 +2,10 @@
 
 **Very experimental! No compatibility guarantees!**
 
+Ghidra version: 9.1 (git master)
+
+![Tetris disassembly](screenshot.png)
+
 ## How to build
 
 ```
@@ -14,6 +18,8 @@ or
 ```
 ./gradlew -PGHIDRA_INSTALL_DIR=/path/to/ghidra
 ```
+
+You can then find a built extension .zip in the `dist` directory.
 
 ## License
 
