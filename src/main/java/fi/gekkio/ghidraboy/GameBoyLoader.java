@@ -26,9 +26,11 @@ import ghidra.framework.model.DomainObject;
 import ghidra.program.database.function.OverlappingFunctionException;
 import ghidra.program.model.address.AddressOverflowException;
 import ghidra.program.model.address.AddressSet;
+import ghidra.program.model.data.DataUtilities.ClearDataMode;
 import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.SourceType;
+import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.exception.InvalidInputException;
 import ghidra.util.task.TaskMonitor;
@@ -40,12 +42,15 @@ import java.util.List;
 
 import static fi.gekkio.ghidraboy.BootRomUtils.detectBootRom;
 import static fi.gekkio.ghidraboy.GameBoyUtils.addHardwareBlocks;
+import static fi.gekkio.ghidraboy.GameBoyUtils.populateHardwareBlocks;
 import static fi.gekkio.ghidraboy.RomUtils.detectRom;
 import static ghidra.app.util.MemoryBlockUtils.createInitializedBlock;
 import static ghidra.app.util.MemoryBlockUtils.createUninitializedBlock;
+import static ghidra.program.model.data.DataUtilities.createData;
 
 public class GameBoyLoader extends AbstractProgramLoader {
     private static final String OPT_HW_BLOCKS = "Create GB hardware memory blocks";
+    private static final String OPT_DATA_TYPES = "Create GB data types";
     private static final String OPT_KIND = "Hardware type";
 
     @Override
@@ -81,6 +86,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
     public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec, DomainObject domainObject, boolean isLoadIntoProgram) {
         var result = super.getDefaultOptions(provider, loadSpec, domainObject, isLoadIntoProgram);
         result.add(new Option(OPT_HW_BLOCKS, true));
+        result.add(new Option(OPT_DATA_TYPES, true));
         try {
             var bootRom = detectBootRom(provider);
             if (bootRom.isPresent()) {
@@ -109,14 +115,25 @@ public class GameBoyLoader extends AbstractProgramLoader {
         var program = createProgram(provider, programName, baseAddress, getName(), language, compiler, consumer);
         var success = false;
         try {
+            var kind = OptionUtils.getOption(OPT_KIND, options, GameBoyKind.GB);
+            if (OptionUtils.getBooleanOptionValue(OPT_DATA_TYPES, options, true)) {
+                int id = program.startTransaction("Create GB data types");
+                try {
+                    DataTypes.addAll(program.getDataTypeManager());
+                } finally {
+                    program.endTransaction(id, true);
+                }
+            }
             if (loadInto(provider, loadSpec, options, log, program, monitor)) {
                 createDefaultMemoryBlocks(program, language, log);
 
                 if (OptionUtils.getBooleanOptionValue(OPT_HW_BLOCKS, options, true)) {
                     int id = program.startTransaction("Create GB hardware memory blocks");
-                    var kind = OptionUtils.getOption(OPT_KIND, options, GameBoyKind.GB);
                     try {
                         addHardwareBlocks(program, kind, log);
+                        populateHardwareBlocks(program, kind);
+                    } catch (InvalidInputException | CodeUnitInsertionException e) {
+                        log.appendException(e);
                     } finally {
                         program.endTransaction(id, true);
                     }
@@ -194,7 +211,22 @@ public class GameBoyLoader extends AbstractProgramLoader {
                 throw new CancelledException("Loading failed: " + e.getMessage());
             }
         }
+        var createDataTypes = OptionUtils.getBooleanOptionValue(OPT_DATA_TYPES, options, true);
+
+        if (createDataTypes || program.getDataTypeManager().contains(DataTypes.LOGO)) {
+            try {
+                createData(program, as.getAddress(0x0104), DataTypes.LOGO, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+            } catch (CodeUnitInsertionException e) {
+                log.appendException(e);
+            }
+        }
+        if (createDataTypes || program.getDataTypeManager().contains(DataTypes.HEADER)) {
+            try {
+                createData(program, as.getAddress(0x0134), DataTypes.HEADER, -1, false, ClearDataMode.CLEAR_ALL_UNDEFINED_CONFLICT_DATA);
+            } catch (CodeUnitInsertionException e) {
+                log.appendException(e);
+            }
+        }
         return true;
     }
-
 }
