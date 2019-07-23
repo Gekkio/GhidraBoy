@@ -23,7 +23,9 @@ import ghidra.app.util.opinion.LoadSpec;
 import ghidra.app.util.opinion.LoaderTier;
 import ghidra.framework.model.DomainFolder;
 import ghidra.framework.model.DomainObject;
+import ghidra.program.database.function.OverlappingFunctionException;
 import ghidra.program.model.address.AddressOverflowException;
+import ghidra.program.model.address.AddressSet;
 import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.SourceType;
@@ -38,6 +40,7 @@ import java.util.List;
 
 import static fi.gekkio.ghidraboy.BootRomUtils.detectBootRom;
 import static fi.gekkio.ghidraboy.GameBoyUtils.addHardwareBlocks;
+import static fi.gekkio.ghidraboy.RomUtils.detectRom;
 import static ghidra.app.util.MemoryBlockUtils.createInitializedBlock;
 import static ghidra.app.util.MemoryBlockUtils.createUninitializedBlock;
 
@@ -68,7 +71,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
     @Override
     public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
         var result = new ArrayList<LoadSpec>();
-        if (detectBootRom(provider).isPresent()) {
+        if (detectBootRom(provider).isPresent() || detectRom(provider).isPresent()) {
             result.add(new LoadSpec(this, 0, new LanguageCompilerSpecPair("SM83:LE:16:default", "default"), true));
         }
         return result;
@@ -82,6 +85,11 @@ public class GameBoyLoader extends AbstractProgramLoader {
             var bootRom = detectBootRom(provider);
             if (bootRom.isPresent()) {
                 result.add(new GameBoyKindOption(OPT_KIND, bootRom.get()));
+                return result;
+            }
+            var rom = detectRom(provider);
+            if (rom.isPresent()) {
+                result.add(new GameBoyKindOption(OPT_KIND, rom.get()));
                 return result;
             }
         } catch (IOException e) {
@@ -125,11 +133,13 @@ public class GameBoyLoader extends AbstractProgramLoader {
 
     @Override
     protected boolean loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor) throws IOException, CancelledException {
+        var as = program.getAddressFactory().getDefaultAddressSpace();
+
         var bootRom = detectBootRom(provider);
+        var rom = MemoryBlockUtils.createFileBytes(program, provider);
+
         if (bootRom.isPresent()) {
-            var rom = MemoryBlockUtils.createFileBytes(program, provider);
             var cgb = GameBoyKind.CGB.equals(bootRom.get());
-            var as = program.getAddressFactory().getDefaultAddressSpace();
             try {
                 createInitializedBlock(program, false, cgb ? "boot0" : "boot", as.getAddress(0x0000), rom, 0, 0x100, "", getName(), false, false, true, log);
                 createUninitializedBlock(program, false, "rom", as.getAddress(0x0100), 0x50, "", getName(), true, false, false, log);
@@ -139,6 +149,46 @@ public class GameBoyLoader extends AbstractProgramLoader {
                 var st = program.getSymbolTable();
                 st.addExternalEntryPoint(as.getAddress(0x0000));
                 st.createLabel(as.getAddress(0x0000), "boot_entry", SourceType.IMPORTED);
+            } catch (AddressOverflowException | InvalidInputException e) {
+                log.appendException(e);
+                throw new CancelledException("Loading failed: " + e.getMessage());
+            }
+        } else {
+            var banked = provider.length() > 0x8000;
+            try {
+                createInitializedBlock(program, false, banked ? "rom0" : "rom", as.getAddress(0x0000), rom, 0, banked ? 0x4000 : 0x8000, "", getName(), true, false, true, log);
+                var st = program.getSymbolTable();
+                st.createLabel(as.getAddress(0x0000), "rst00", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0008), "rst08", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0010), "rst10", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0018), "rst18", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0020), "rst20", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0028), "rst28", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0030), "rst30", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0038), "rst38", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0040), "intr_vblank", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0048), "intr_stat", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0050), "intr_timer", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0058), "intr_serial", SourceType.IMPORTED);
+                st.createLabel(as.getAddress(0x0060), "intr_joypad", SourceType.IMPORTED);
+                st.addExternalEntryPoint(as.getAddress(0x0100));
+                try {
+                    var entry = program.getFunctionManager().createFunction("entry", as.getAddress(0x0100), new AddressSet(as.getAddress(0x0100), as.getAddress(0x103)), SourceType.IMPORTED);
+                    entry.setNoReturn(true);
+                } catch (OverlappingFunctionException e) {
+                    log.appendException(e);
+                }
+
+                if (banked) {
+                    var romX = as.getAddress(0x4000);
+                    var offset = 0x4000;
+                    var bank = 1;
+                    while (offset < rom.getSize()) {
+                        createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "", getName(), true, false, true, log);
+                        offset += 0x4000;
+                        bank += 1;
+                    }
+                }
             } catch (AddressOverflowException | InvalidInputException e) {
                 log.appendException(e);
                 throw new CancelledException("Loading failed: " + e.getMessage());
