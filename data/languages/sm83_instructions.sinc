@@ -42,11 +42,11 @@
   A = *:1 DE;
 }
 
-:LD A, CMem8 is op0_8=0xf2 & A & CMem8 {
+:LDH A, CMem8 is op0_8=0xf2 & A & CMem8 {
   A = CMem8;
 }
 
-:LD CMem8, A is op0_8=0xe2 & A & CMem8 {
+:LDH CMem8, A is op0_8=0xe2 & A & CMem8 {
   CMem8 = A;
 }
 
