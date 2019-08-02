@@ -41,6 +41,14 @@ or
 
 You can then find a built extension .zip in the `dist` directory.
 
+## How to install
+
+1. Start Ghidra
+2. File -> Install Extensions
+3. Press the plus icon ("Add extension")
+4. Choose the built or downloaded GhidraBoy zip file
+5. Restart Ghidra when prompted to load the extension properly
+
 ## Open questions / problems
 
 - Decompiler output is difficult to read if certain instructions are used (e.g.
