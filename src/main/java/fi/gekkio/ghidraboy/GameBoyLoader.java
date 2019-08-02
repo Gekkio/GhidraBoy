@@ -13,10 +13,10 @@
 // limitations under the License.
 package fi.gekkio.ghidraboy;
 
-import ghidra.app.util.MemoryBlockUtils;
 import ghidra.app.util.Option;
 import ghidra.app.util.OptionUtils;
 import ghidra.app.util.bin.ByteProvider;
+import ghidra.app.util.importer.MemoryConflictHandler;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.app.util.opinion.AbstractProgramLoader;
 import ghidra.app.util.opinion.LoadSpec;
@@ -43,9 +43,9 @@ import java.util.List;
 import static fi.gekkio.ghidraboy.BootRomUtils.detectBootRom;
 import static fi.gekkio.ghidraboy.GameBoyUtils.addHardwareBlocks;
 import static fi.gekkio.ghidraboy.GameBoyUtils.populateHardwareBlocks;
+import static fi.gekkio.ghidraboy.Ghidra90Compat.createInitializedBlock;
+import static fi.gekkio.ghidraboy.Ghidra90Compat.createUninitializedBlock;
 import static fi.gekkio.ghidraboy.RomUtils.detectRom;
-import static ghidra.app.util.MemoryBlockUtils.createInitializedBlock;
-import static ghidra.app.util.MemoryBlockUtils.createUninitializedBlock;
 import static ghidra.program.model.data.DataUtilities.createData;
 
 public class GameBoyLoader extends AbstractProgramLoader {
@@ -124,7 +124,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                     program.endTransaction(id, true);
                 }
             }
-            if (loadInto(provider, loadSpec, options, log, program, monitor)) {
+            if (loadInto(provider, loadSpec, options, log, program, monitor, MemoryConflictHandler.ALWAYS_OVERWRITE)) {
                 createDefaultMemoryBlocks(program, language, log);
 
                 if (OptionUtils.getBooleanOptionValue(OPT_HW_BLOCKS, options, true)) {
@@ -149,11 +149,11 @@ public class GameBoyLoader extends AbstractProgramLoader {
     }
 
     @Override
-    protected boolean loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor) throws IOException, CancelledException {
+    protected boolean loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor, MemoryConflictHandler memoryConflictHandler) throws IOException, CancelledException {
         var as = program.getAddressFactory().getDefaultAddressSpace();
 
         var bootRom = detectBootRom(provider);
-        var rom = MemoryBlockUtils.createFileBytes(program, provider);
+        var rom = provider.readBytes(0, provider.length());
 
         if (bootRom.isPresent()) {
             var cgb = GameBoyKind.CGB.equals(bootRom.get());
@@ -200,7 +200,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                     var romX = as.getAddress(0x4000);
                     var offset = 0x4000;
                     var bank = 1;
-                    while (offset < rom.getSize()) {
+                    while (offset < rom.length) {
                         createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "", getName(), true, false, true, log);
                         offset += 0x4000;
                         bank += 1;

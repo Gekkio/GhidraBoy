@@ -24,7 +24,7 @@ import ghidra.util.exception.InvalidInputException;
 
 import static fi.gekkio.ghidraboy.DataTypes.array;
 import static fi.gekkio.ghidraboy.DataTypes.u8;
-import static ghidra.app.util.MemoryBlockUtils.createUninitializedBlock;
+import static fi.gekkio.ghidraboy.Ghidra90Compat.createUninitializedBlock;
 import static ghidra.program.model.data.DataUtilities.createData;
 
 public final class GameBoyUtils {

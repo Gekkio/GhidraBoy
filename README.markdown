@@ -2,7 +2,7 @@
 
 **Very experimental! No compatibility guarantees!**
 
-Ghidra version: 9.1 (git master)
+Ghidra version: 9.0.4
 
 ![Tetris disassembly](screenshot.png)
 
