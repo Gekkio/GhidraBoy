@@ -153,7 +153,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
         var as = program.getAddressFactory().getDefaultAddressSpace();
 
         var bootRom = detectBootRom(provider);
-        var rom = MemoryBlockUtils.createFileBytes(program, provider);
+        var rom = MemoryBlockUtils.createFileBytes(program, provider, monitor);
 
         if (bootRom.isPresent()) {
             var cgb = GameBoyKind.CGB.equals(bootRom.get());
