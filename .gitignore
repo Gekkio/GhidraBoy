@@ -8,6 +8,4 @@
 build/
 dist/
 
-gradle/wrapper/gradle-wrapper.jar
-
 *.sla
