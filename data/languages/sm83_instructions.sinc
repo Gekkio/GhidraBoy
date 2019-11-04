@@ -203,6 +203,7 @@
 :INC (HL) is op0_8=0x34 & HL {
   local val:1 = *:1 HL;
   aluInc(val);
+  *:1 HL = val;
 }
 
 :DEC reg3_3 is op6_2=0b00 & reg3_3 & op0_3=0b101 {
@@ -212,6 +213,7 @@
 :DEC (HL) is op0_8=0x35 & HL {
   local val:1 = *:1 HL;
   aluDec(val);
+  *:1 HL = val;
 }
 
 :RLCA is op0_8=0x07 {
