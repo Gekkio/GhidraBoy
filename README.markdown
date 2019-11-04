@@ -2,10 +2,7 @@
 
 **Very experimental! No compatibility guarantees!**
 
-Ghidra version:
-
-* master branch: Ghidra 9.1-BETA_DEV_20190923
-* ghidra_9.0 branch: Ghidra 9.0.4
+Ghidra version: Ghidra 9.1_PUBLIC_20191023
 
 ![Tetris disassembly](screenshot.png)
 
