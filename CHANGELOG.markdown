@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 20200122 - 2020-01-22
+
+### Changed
+
+- Build with Ghidra 9.1.1
+
 ### Fixed
 
 - Fix INC (HL) and DEC (HL) behaviour. These were considered no-ops
