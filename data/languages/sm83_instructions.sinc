@@ -429,8 +429,6 @@
 
 :STOP is op0_8=0x10 {
   stop();
-  PC = PC + 1;
-  goto [PC];
 }
 
 :DI is op0_8=0xf3 {
