@@ -13,6 +13,7 @@ jobs:
       GHIDRA_VERSION: ghidra_9.1.2_PUBLIC
       GHIDRA_BUILD_DATE: 20200212
       GHIDRA_SHA256: ebe3fa4e1afd7d97650990b27777bb78bd0427e8e70c1d0ee042aeb52decac61
+      GHIDRA_INSTALL_DIR: /home/runner/ghidra
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -20,5 +21,5 @@ jobs:
           java-version: '11'
       - name: Install Ghidra
         run: .github/scripts/install_ghidra.sh
-      - name: Run gradle
-        run: ./gradlew -Pghidra.dir=/home/runner/${{ env.GHIDRA_VERSION }} build
+      - run: ./gradlew assemble
+      - run: ./gradlew test

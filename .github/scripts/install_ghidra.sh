@@ -8,3 +8,4 @@ curl -sSL "https://ghidra-sre.org/${GHIDRA_VERSION}_${GHIDRA_BUILD_DATE}.zip" -O
 
 echo "${GHIDRA_SHA256} ${GHIDRA_ZIP}" | sha256sum -c
 unzip "${GHIDRA_ZIP}"
+mv "${HOME}/${GHIDRA_VERSION}" "${HOME}/ghidra"
