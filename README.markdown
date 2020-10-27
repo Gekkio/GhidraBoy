@@ -36,7 +36,7 @@ or
 ./gradlew -PGHIDRA_INSTALL_DIR=/path/to/ghidra
 ```
 
-You can then find a built extension .zip in the `dist` directory.
+You can then find a built extension .zip in the `build/distributions` directory.
 
 ## How to install
 
