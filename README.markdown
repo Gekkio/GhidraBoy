@@ -33,7 +33,7 @@ export GHIDRA_INSTALL_DIR=/path/to/ghidra
 or
 
 ```
-./gradlew -PGHIDRA_INSTALL_DIR=/path/to/ghidra
+./gradlew -Pghidra.dir=/path/to/ghidra
 ```
 
 You can then find a built extension .zip in the `build/distributions` directory.
