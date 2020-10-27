@@ -19,4 +19,4 @@ jobs:
       - name: Install Ghidra
         run: .github/scripts/install_ghidra.sh
       - name: Run gradle
-        run: ./gradlew -PGHIDRA_INSTALL_DIR=$HOME/$GHIDRA_VERSION
+        run: ./gradlew -PGHIDRA_INSTALL_DIR=${{ env.HOME }}/${{ env.GHIDRA_VERSION }}
