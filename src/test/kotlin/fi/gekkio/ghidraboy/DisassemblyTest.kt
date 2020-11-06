@@ -13,25 +13,15 @@
 // limitations under the License.
 package fi.gekkio.ghidraboy
 
-import generic.jar.ResourceFile
-import ghidra.app.plugin.processors.sleigh.SleighLanguageProvider
+import ghidra.app.emulator.EmulatorHelper
 import ghidra.program.database.ProgramDB
 import ghidra.program.disassemble.Disassembler
-import ghidra.program.model.address.Address
-import ghidra.program.model.lang.Language
 import ghidra.program.model.listing.CodeUnit
 import ghidra.util.task.TaskMonitor
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
-import java.io.File
 
-@ExtendWith(GhidraApplication::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DisassemblyTest {
+class DisassemblyTest : IntegrationTest() {
     @Test
     fun `can disassemble NOP`() = test(0x00, "NOP")
 
@@ -767,7 +757,13 @@ class DisassemblyTest {
     fun `can disassemble XOR n`() = test(0xee, "XOR 0x55", 0x55)
 
     @Test
-    fun `can disassemble RST 0x28`() = test(0xef, "RST 0x0028")
+    fun `can disassemble RST 0x28`() = test(0xef, "RST 0x0028") {
+        val helper = EmulatorHelper(it.program)
+        helper.writeRegister("SP", 0xffff)
+        helper.step(TaskMonitor.DUMMY)
+        println(helper.readRegister("SP"))
+        println(helper.readRegister("PC"))
+    }
 
     @Test
     fun `can disassemble LDH A, (n)`() = test(0xf0, "LDH A,(0x55)", 0x55)
@@ -820,22 +816,6 @@ class DisassemblyTest {
     @Test
     fun `can disassemble RST 0x38`() = test(0xff, "RST 0x0038")
 
-
-    private lateinit var language: Language
-
-    @BeforeAll
-    fun beforeAll() {
-        val defs = ResourceFile(File("data/languages/sm83.ldefs"))
-        val provider = SleighLanguageProvider(defs)
-        assertFalse(provider.hadLoadFailure())
-        val languageDescription = provider.languageDescriptions.single()
-
-        assertEquals("Sharp SM83", languageDescription.description)
-        assertEquals("SM83", languageDescription.processor.toString())
-
-        language = provider.getLanguage(languageDescription.languageID)
-    }
-
     private fun test(opcode: Int, expected: String, vararg args: Int, assertions: (codeUnit: CodeUnit) -> Unit = {}) {
         val codeUnit = disassemble(byteArrayOf(opcode.toByte(), *(args.map { it.toByte() }).toByteArray()))
         assertEquals(expected, codeUnit.toString())
@@ -854,6 +834,4 @@ class DisassemblyTest {
             program.codeManager.getCodeUnitAt(block.start)
         }
     }
-
-    private fun address(offset: Long): Address = language.addressFactory.defaultAddressSpace.getAddress(offset)
 }

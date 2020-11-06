@@ -11,12 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package fi.gekkio.ghidraboy
+package fi.gekkio.ghidraboy.emu
 
-import ghidra.program.model.address.Address
-import ghidra.program.model.mem.Memory
-import ghidra.program.model.mem.MemoryBlock
-import ghidra.util.task.TaskMonitor
+import ghidra.pcode.emulate.BreakCallBack
+import ghidra.pcode.pcoderaw.PcodeOpRaw
 
-fun Memory.loadBytes(name: String, start: Address, bytes: ByteArray, overlay: Boolean = false): MemoryBlock =
-    createInitializedBlock(name, start, bytes.inputStream(), bytes.size.toLong(), TaskMonitor.DUMMY, overlay)
+class IgnorePCode : BreakCallBack() {
+    var triggered: Boolean = false
+        private set
+
+    override fun pcodeCallback(op: PcodeOpRaw): Boolean {
+        triggered = true
+        return true
+    }
+}

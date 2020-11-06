@@ -27,7 +27,7 @@ class GhidraApplication : Extension {
         private var initialized = false
 
         fun initialize() = synchronized(this) {
-            check(!initialized) { "Can't initialize Ghidra more than once" }
+            if (initialized) return
             val layout = GhidraApplicationLayout()
             val configuration = HeadlessGhidraApplicationConfiguration()
             Application.initializeApplication(layout, configuration)

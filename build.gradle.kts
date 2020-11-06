@@ -11,14 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
     java
+    kotlin("jvm") version "1.4.10"
+    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
 repositories {
@@ -26,8 +27,8 @@ repositories {
 }
 
 val ghidraDir = System.getenv("GHIDRA_INSTALL_DIR")
-        ?: (project.findProperty("ghidra.dir") as? String)
-        ?: throw IllegalStateException("Can't find Ghidra installation")
+    ?: (project.findProperty("ghidra.dir") as? String)
+    ?: throw IllegalStateException("Can't find Ghidra installation")
 
 val ghidraProps = Properties().apply { file("$ghidraDir/Ghidra/application.properties").inputStream().use { load(it) } }
 val ghidraVersion = ghidraProps.getProperty("application.version")!!
@@ -42,6 +43,7 @@ java {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
     }
 }
 
@@ -57,6 +59,7 @@ dependencies {
     testImplementation(kotlin("stdlib-jdk8"))
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -67,11 +70,11 @@ val generateExtensionProps by tasks.registering() {
         output.outputStream().use {
             val props = Properties()
             props += mapOf(
-                    ("name" to "GhidraBoy"),
-                    ("description" to "Support for Sharp SM83 / Game Boy"),
-                    ("author" to "Gekkio"),
-                    ("createdOn" to LocalDate.now().toString()),
-                    ("version" to ghidraVersion)
+                ("name" to "GhidraBoy"),
+                ("description" to "Support for Sharp SM83 / Game Boy"),
+                ("author" to "Gekkio"),
+                ("createdOn" to LocalDate.now().toString()),
+                ("version" to ghidraVersion)
             )
             props.store(it, null)
         }
@@ -83,10 +86,10 @@ val compileSleigh by tasks.registering(JavaExec::class) {
     val slaFile = file("data/languages/sm83.sla")
 
     inputs.files(fileTree("data/languages").include("*.slaspec", "*.sinc"))
-            .withPropertyName("sourceFiles")
-            .withPathSensitivity(PathSensitivity.RELATIVE)
+        .withPropertyName("sourceFiles")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.files(slaFile)
-            .withPropertyName("outputFile")
+        .withPropertyName("outputFile")
 
     classpath = configurations["ghidra"]
     main = "ghidra.pcodeCPort.slgh_compile.SleighCompile"

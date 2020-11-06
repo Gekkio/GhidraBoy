@@ -60,7 +60,7 @@ public final class DataTypes {
         TITLE_BLOCK.add(TITLE_BLOCK_OLD, "old_format", null);
         TITLE_BLOCK.add(TITLE_BLOCK_NEW, "new_format", null);
 
-        SGB_FLAG = new EnumDataType("sflag", 1);
+        SGB_FLAG = new EnumDataType("sgb_flag", 1);
         SGB_FLAG.add("NONE", 0x00);
         SGB_FLAG.add("SUPPORT", 0x03);
 

@@ -14,25 +14,20 @@
 package fi.gekkio.ghidraboy;
 
 import ghidra.app.util.bin.ByteProvider;
-import ghidra.util.HashUtilities;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
-
-import static ghidra.util.HashUtilities.getHash;
 
 public final class RomUtils {
     private RomUtils() {
     }
 
-    private static final String LOGO_HASH = "daf4cabdc852baa0291849203f0b41fd0b4ecd58e0d7aff4a509f5de4d7f9a2e";
+    private static final Sha256 LOGO_HASH = Sha256.parse("daf4cabdc852baa0291849203f0b41fd0b4ecd58e0d7aff4a509f5de4d7f9a2e");
 
     public static Optional<GameBoyKind> detectRom(ByteProvider provider) throws IOException {
         if (provider.length() >= 0x150) {
             var logo = provider.readBytes(0x0104, 0x30);
-            var hash = getHash(HashUtilities.SHA256_ALGORITHM, new ByteArrayInputStream(logo));
-            if (LOGO_HASH.equals(hash)) {
+            if (LOGO_HASH.equals(Sha256.of(logo))) {
                 var cgbFlag = (short) provider.readByte(0x0143);
                 return Optional.of((cgbFlag & 0x80) == 0 ? GameBoyKind.GB : GameBoyKind.CGB);
             }
