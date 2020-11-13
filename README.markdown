@@ -23,6 +23,15 @@ Ghidra version: Ghidra 9.2_PUBLIC_20201113
 * Game Boy cartridge header data types
   - Enumerated types for some things
 
+## How to install
+
+1. Download a [prebuilt GhidraBoy release](https://github.com/Gekkio/GhidraBoy/releases), or build it yourself.
+2. Start Ghidra
+3. File -> Install Extensions
+4. Press the plus icon ("Add extension")
+5. Choose the built or downloaded GhidraBoy zip file
+6. Restart Ghidra when prompted to load the extension properly
+
 ## How to build
 
 As a prerequisite, you need to have a Ghidra installation somewhere (an actual
@@ -40,14 +49,6 @@ or
 ```
 
 You can then find a built extension .zip in the `build/distributions` directory.
-
-## How to install
-
-1. Start Ghidra
-2. File -> Install Extensions
-3. Press the plus icon ("Add extension")
-4. Choose the built or downloaded GhidraBoy zip file
-5. Restart Ghidra when prompted to load the extension properly
 
 ## Open questions / problems
 
