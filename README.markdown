@@ -25,6 +25,9 @@ Ghidra version: Ghidra 9.1.2_PUBLIC_20200212
 
 ## How to build
 
+As a prerequisite, you need to have a Ghidra installation somewhere (an actual
+installation, not a copy of Ghidra source code!).
+
 ```
 export GHIDRA_INSTALL_DIR=/path/to/ghidra
 ./gradlew
