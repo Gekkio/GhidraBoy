@@ -10,9 +10,9 @@ jobs:
     name: Build + test
     runs-on: ubuntu-latest
     env:
-      GHIDRA_VERSION: ghidra_9.2_PUBLIC
-      GHIDRA_BUILD_DATE: 20201113
-      GHIDRA_SHA256: ffebd3d87bc7c6d9ae1766dd3293d1fdab3232a99b170f8ea8b57497a1704ff6
+      GHIDRA_VERSION: ghidra_9.2.1_PUBLIC
+      GHIDRA_BUILD_DATE: 20201215
+      GHIDRA_SHA256: cfaeb2b5938dec90388e936f63600ad345d41b509ffed4727142ba9ed44cb5e8
       GHIDRA_INSTALL_DIR: /home/runner/ghidra
     steps:
       - uses: actions/checkout@v2
