@@ -201,7 +201,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                     var offset = 0x4000;
                     var bank = 1;
                     while (offset < rom.getSize()) {
-                        createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "", getName(), true, false, true, log);
+                        createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "Offset " + offset + "in ROM file", getName(), true, false, true, log);
                         offset += 0x4000;
                         bank += 1;
                     }
