@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 20210120 - 2021-01-20
+
+### Added
+
+- Absolute offset as the comment in ROM memory banks. Note: this is done when importing a ROM, so existing projects won't automatically get the comments just by upgrading GhidraBoy
+
+### Changed
+
+- Build with Ghidra 9.2.2
+
 ## 20201223 - 2020-12-23
 
 ### Changed
