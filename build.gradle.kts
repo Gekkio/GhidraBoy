@@ -18,8 +18,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.5.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    kotlin("jvm") version "1.5.20"
+    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
 }
 
 repositories {
