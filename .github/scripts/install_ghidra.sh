@@ -8,4 +8,4 @@ curl -sSL "https://github.com/NationalSecurityAgency/ghidra/releases/download/Gh
 
 echo "${GHIDRA_SHA256} ${GHIDRA_ZIP}" | sha256sum -c
 unzip "${GHIDRA_ZIP}"
-mv "${HOME}/${GHIDRA_VERSION}" "${HOME}/ghidra"
+mv "${HOME}/ghidra_${GHIDRA_VERSION}_PUBLIC" "${HOME}/ghidra"
