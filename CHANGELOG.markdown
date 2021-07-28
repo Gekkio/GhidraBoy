@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Build with Ghidra 10.0.1
+
 ## 20210630 - 2021-06-30
 
 ### Changed
