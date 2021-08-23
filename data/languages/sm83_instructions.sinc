@@ -220,40 +220,40 @@
   # TODO: double-check flags
   local co:1 = (A >> 7);
   A = (A << 1) | co;
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = co;
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = co;
 }
 
 :RLA is op0_8=0x17 {
   # TODO: double-check flags
   local co:1 = (A >> 7);
-  A = (A << 1) | $(C_flag);
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = co;
+  A = (A << 1) | C_FLAG;
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = co;
 }
 
 :RRCA is op0_8=0x0f {
   # TODO: double-check flags
   local co:1 = A & 1;
   A = (A >> 1) | (co << 7);
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = co;
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = co;
 }
 
 :RRA is op0_8=0x1f {
   # TODO: double-check flags
   local co:1 = A & 1;
-  A = (A >> 1) | ($(C_flag) << 7);
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = co;
+  A = (A >> 1) | (C_FLAG << 7);
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = co;
 }
 
 :RLC reg0_3 is op0_8=0xcb; op6_2=0b00 & op3_3=0b000 & reg0_3 {
@@ -442,15 +442,15 @@
 }
 
 :CCF is op0_8=0x3f {
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = !$(C_flag);
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = !C_FLAG;
 }
 
 :SCF is op0_8=0x37 {
-  $(N_flag) = 0;
-  $(H_flag) = 0;
-  $(C_flag) = 1;
+  N_FLAG = 0;
+  H_FLAG = 0;
+  C_FLAG = 1;
 }
 
 :NOP is op0_8=0x00 {
@@ -462,8 +462,8 @@
 
 :CPL is op0_8=0x2f {
   A = ~A;
-  $(N_flag) = 1;
-  $(H_flag) = 1;
+  N_FLAG = 1;
+  H_FLAG = 1;
 }
 
 # 16-bit loads
@@ -483,10 +483,10 @@
 :LD HL, SP+simm8 is op0_8=0xf8 & HL & SP; simm8 {
   # TODO: double-check flags
   local tmp:2 = SP + simm8;
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
-  $(C_flag) = carry(SP:1, simm8);
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  C_FLAG = carry(SP:1, simm8);
   HL = tmp;
 }
 
@@ -495,15 +495,25 @@
 ] {
   # TODO: double-check flags
   local tmp:2 = SP + simm8;
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
-  $(C_flag) = carry(SP:1, simm8);
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  C_FLAG = carry(SP:1, simm8);
   HL = tmp;
+}
+
+:PUSH qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0101 & qregpair4_2=AF {
+  packflags(F);
+  push16(qregpair4_2);
 }
 
 :PUSH qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0101 {
   push16(qregpair4_2);
+}
+
+:POP qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0001 & qregpair4_2=AF {
+  pop16(AF);
+  unpackflags(F);
 }
 
 :POP qregpair4_2 is op6_2=0b11 & qregpair4_2 & op0_4=0b0001 {
@@ -515,19 +525,19 @@
 :ADD HL, sregpair4_2 is op6_2=0b00 & sregpair4_2 & op0_4=0b1001 & HL {
   # TODO: double-check flags
   local tmp:2 = HL + sregpair4_2;
-  $(N_flag) = 0;
-  $(H_flag) = (((HL & 0xfff) + (sregpair4_2 & 0xfff)) & 0x1000) != 0;
-  $(C_flag) = carry(HL, sregpair4_2);
+  N_FLAG = 0;
+  H_FLAG = (((HL & 0xfff) + (sregpair4_2 & 0xfff)) & 0x1000) != 0;
+  C_FLAG = carry(HL, sregpair4_2);
   HL = tmp;
 }
 
 :ADD SP, simm8 is op0_8=0xe8 & SP; simm8 {
   # TODO: double-check flags
   local tmp:2 = SP + simm8;
-  $(Z_flag) = 0;
-  $(N_flag) = 0;
-  $(H_flag) = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
-  $(C_flag) = carry(SP:1, simm8);
+  Z_FLAG = 0;
+  N_FLAG = 0;
+  H_FLAG = (((SP:1 & 0xf) + (simm8 & 0xf)) & 0x10) != 0;
+  C_FLAG = carry(SP:1, simm8);
   SP = tmp;
 }
 
