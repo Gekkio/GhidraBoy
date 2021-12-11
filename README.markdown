@@ -2,7 +2,7 @@
 
 **Very experimental! No compatibility guarantees!**
 
-Ghidra version: Ghidra 10.0.4_PUBLIC_20210928
+Ghidra version: Ghidra 10.1_PUBLIC_20211210
 
 ![Tetris disassembly](screenshot.png)
 
