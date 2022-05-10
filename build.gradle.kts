@@ -18,8 +18,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.6.10"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    kotlin("jvm") version "1.6.21"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
 repositories {
@@ -43,7 +43,7 @@ java {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
+        freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
     }
 }
 
