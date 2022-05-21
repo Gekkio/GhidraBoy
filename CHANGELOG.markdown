@@ -4,21 +4,31 @@
 
 ## 20220521 - 2022-05-21
 
+### Changed
+
 - Build with Ghidra 10.1.4
 
 ## 20220510 - 2022-05-10
+
+### Changed
 
 - Build with Ghidra 10.1.3
 
 ## 20220316 - 2022-03-16
 
+### Changed
+
 - Build with Ghidra 10.1.2
 
 ## 20211211 - 2021-12-11
 
+### Changed
+
 - Build with Ghidra 10.1
 
 ## 20211028 - 2021-10-28
+
+### Changed
 
 - Build with Ghidra 10.0.4
 
