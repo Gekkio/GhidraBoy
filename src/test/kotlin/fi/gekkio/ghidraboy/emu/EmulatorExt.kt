@@ -55,7 +55,13 @@ fun EmulatorHelper.assertPC(pc: UShort) = assertEquals(pc, readPC())
 fun EmulatorHelper.assertSP(sp: UShort) = assertEquals(sp, readSP())
 
 fun EmulatorHelper.readA(): UByte = this.readRegister("A").toInt().toUByte()
-fun EmulatorHelper.readF(): UByte = this.readRegister("F").toInt().toUByte()
+fun EmulatorHelper.readF(): UByte = (
+    this.readRegister("Z_FLAG").toInt().shl(7)
+        .or(this.readRegister("N_FLAG").toInt().shl(6))
+        .or(this.readRegister("H_FLAG").toInt().shl(5))
+        .or(this.readRegister("C_FLAG").toInt().shl(4))
+    ).toUByte()
+
 fun EmulatorHelper.readB(): UByte = this.readRegister("B").toInt().toUByte()
 fun EmulatorHelper.readC(): UByte = this.readRegister("C").toInt().toUByte()
 fun EmulatorHelper.readD(): UByte = this.readRegister("D").toInt().toUByte()
@@ -70,7 +76,12 @@ fun EmulatorHelper.readPC(): UShort = this.readRegister("PC").toInt().toUShort()
 fun EmulatorHelper.readSP(): UShort = this.readRegister("SP").toInt().toUShort()
 
 fun EmulatorHelper.writeA(a: UByte) = this.writeRegister("A", a.toLong())
-fun EmulatorHelper.writeF(f: UByte) = this.writeRegister("F", f.toLong())
+fun EmulatorHelper.writeF(f: UByte) {
+    this.writeRegister("Z_FLAG", f.toLong().shr(7).and(1))
+    this.writeRegister("N_FLAG", f.toLong().shr(6).and(1))
+    this.writeRegister("H_FLAG", f.toLong().shr(5).and(1))
+    this.writeRegister("C_FLAG", f.toLong().shr(4).and(1))
+}
 fun EmulatorHelper.writeB(b: UByte) = this.writeRegister("B", b.toLong())
 fun EmulatorHelper.writeC(c: UByte) = this.writeRegister("C", c.toLong())
 fun EmulatorHelper.writeD(d: UByte) = this.writeRegister("D", d.toLong())
