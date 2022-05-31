@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Use separate registers for individual flags. This greatly improves
+  decompilation results
+
 ## 20220521 - 2022-05-21
 
 ### Changed
