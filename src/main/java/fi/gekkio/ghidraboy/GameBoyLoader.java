@@ -105,8 +105,8 @@ public class GameBoyLoader extends AbstractProgramLoader {
     }
 
     @Override
-    protected List<Program> loadProgram(ByteProvider provider, String programName, DomainFolder programFolder, LoadSpec loadSpec, List<Option> options, MessageLog log, Object consumer, TaskMonitor monitor) throws IOException, CancelledException {
-        var result = new ArrayList<Program>();
+    protected List<LoadedProgram> loadProgram(ByteProvider provider, String programName, DomainFolder programFolder, LoadSpec loadSpec, List<Option> options, MessageLog log, Object consumer, TaskMonitor monitor) throws IOException, CancelledException {
+        var result = new ArrayList<LoadedProgram>();
         var pair = loadSpec.getLanguageCompilerSpec();
         var language = getLanguageService().getLanguage(pair.languageID);
         var compiler = language.getCompilerSpecByID(pair.compilerSpecID);
@@ -138,7 +138,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                         program.endTransaction(id, true);
                     }
                 }
-                success = result.add(program);
+                success = result.add(new LoadedProgram(program, programFolder));
             }
         } finally {
             if (!success) {

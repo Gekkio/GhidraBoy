@@ -6,6 +6,8 @@
 
 - Use separate registers for individual flags. This greatly improves
   decompilation results
+- Build with Ghidra 10.2
+- Build with Java 17
 
 ## 20220521 - 2022-05-21
 
