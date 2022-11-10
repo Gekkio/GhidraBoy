@@ -38,12 +38,12 @@ public final class BootRomUtils {
     public static Optional<GameBoyKind> detectBootRom(ByteProvider provider) throws IOException {
         if (provider.length() == 0x100) {
             var hash = Sha256.of(provider);
-            if (Arrays.stream(GB_ROMS).anyMatch(known -> known.equals(hash))) {
+            if (Arrays.asList(GB_ROMS).contains(hash)) {
                 return Optional.of(GameBoyKind.GB);
             }
         } else if (provider.length() == 0x900) {
             var hash = Sha256.of(provider);
-            if (Arrays.stream(CGB_ROMS).anyMatch(known -> known.equals(hash))) {
+            if (Arrays.asList(CGB_ROMS).contains(hash)) {
                 return Optional.of(GameBoyKind.CGB);
             }
         }

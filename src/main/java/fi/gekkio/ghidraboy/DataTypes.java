@@ -132,8 +132,8 @@ public final class DataTypes {
     }
 
     public static void addAll(DataTypeManager m) {
-        DataType types[] = {LOGO, CGB_FLAG, TITLE_BLOCK_OLD, TITLE_BLOCK_NEW, TITLE_BLOCK, SGB_FLAG, CART_TYPE, ROM_SIZE, RAM_SIZE, REGION, HEADER};
-        Category c = m.createCategory(new CategoryPath(CategoryPath.ROOT, "Game Boy"));
+        var types = new DataType[]{LOGO, CGB_FLAG, TITLE_BLOCK_OLD, TITLE_BLOCK_NEW, TITLE_BLOCK, SGB_FLAG, CART_TYPE, ROM_SIZE, RAM_SIZE, REGION, HEADER};
+        var c = m.createCategory(new CategoryPath(CategoryPath.ROOT, "Game Boy"));
         Arrays.stream(types).forEach(d -> c.addDataType(d, DataTypeConflictHandler.DEFAULT_HANDLER));
     }
 

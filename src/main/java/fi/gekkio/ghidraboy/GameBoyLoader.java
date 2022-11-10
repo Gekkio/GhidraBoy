@@ -98,7 +98,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                 result.add(new GameBoyKindOption(OPT_KIND, rom.get()));
                 return result;
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         result.add(new GameBoyKindOption(OPT_KIND, GameBoyKind.GB));
         return result;
