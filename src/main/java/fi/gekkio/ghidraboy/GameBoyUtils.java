@@ -40,7 +40,6 @@ public final class GameBoyUtils {
         } else {
             createUninitializedBlock(program, false, "vram", as.getAddress(0x8000), 0x2000, "", source, true, true, false, log);
         }
-        createUninitializedBlock(program, false, "xram", as.getAddress(0xa000), 0x2000, "", source, true, true, true, log);
         if (kind == GameBoyKind.CGB) {
             createUninitializedBlock(program, false, "wram0", as.getAddress(0xc000), 0x1000, "", source, true, true, true, log);
             for (int i = 1; i <= 7; i++) {
