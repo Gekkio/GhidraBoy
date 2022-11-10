@@ -173,8 +173,8 @@ public class GameBoyLoader extends AbstractProgramLoader {
         } else {
             var banked = provider.length() > 0x8000;
             try {
-                createInitializedBlock(program, false, banked ? "rom0" : "rom", as.getAddress(0x0000), rom, 0, banked ? 0x4000 : 0x8000, "", getName(), true, false, true, log);
-                createUninitializedBlock(program, false, "xram", as.getAddress(0xa000), 0x2000, "", getName(), true, true, true, log);
+                createInitializedBlock(program, false, banked ? "rom0" : "rom", as.getAddress(0x0000), rom, 0, banked ? 0x4000 : 0x8000, "Cartridge ROM (offset 0)", getName(), true, false, true, log);
+                createUninitializedBlock(program, false, "xram", as.getAddress(0xa000), 0x2000, "Cartridge RAM", getName(), true, true, true, log);
                 var st = program.getSymbolTable();
                 st.createLabel(as.getAddress(0x0000), "rst00", SourceType.IMPORTED);
                 st.createLabel(as.getAddress(0x0008), "rst08", SourceType.IMPORTED);
@@ -202,7 +202,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
                     var offset = 0x4000;
                     var bank = 1;
                     while (offset < rom.getSize()) {
-                        createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "Offset %d in ROM file".formatted(offset), getName(), true, false, true, log);
+                        createInitializedBlock(program, true, "rom" + bank, romX, rom, offset, 0x4000, "Cartridge ROM (offset %d)".formatted(offset), getName(), true, false, true, log);
                         offset += 0x4000;
                         bank += 1;
                     }

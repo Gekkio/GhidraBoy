@@ -5,6 +5,7 @@
 ### Added
 
 - Register group "Flags" for the 4 individual flag registers
+- Meaningful comments to all created memory blocks
 
 ### Changed
 
