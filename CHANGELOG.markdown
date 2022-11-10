@@ -13,6 +13,10 @@
 - Build with Ghidra 10.2
 - Build with Java 17
 
+### Fixed
+
+- Typo in ROM bank memory block comment
+
 ## 20220521 - 2022-05-21
 
 ### Changed
