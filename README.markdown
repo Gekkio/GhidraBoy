@@ -11,7 +11,7 @@ Ghidra version: Ghidra 10.1.4_PUBLIC_20220519
 * Sharp SM83 (CPU core used in Game Boy) support for Sleigh
 * Game Boy ROM loader:
   - Can load unbanked ROMs (&lt;= 32kB, e.g. Tetris)
-  - Can load banked ROMs (&gt; >32kB, e.g. Pokemon)
+  - Can load banked ROMs (&gt; 32kB, e.g. Pokemon)
   - Can load greyscale boot ROMs (DMG/DMG0/MGB/SGB/SGB2)
   - Can load color boot ROMs (CGB/CGB0)
 * Memory blocks based on the hardware memory map
