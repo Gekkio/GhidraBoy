@@ -16,4 +16,10 @@
 -->
 <processor_spec>
   <programcounter register="PC"/>
+  <register_data>
+    <register name="C_FLAG" group="Flags"/>
+    <register name="H_FLAG" group="Flags"/>
+    <register name="N_FLAG" group="Flags"/>
+    <register name="Z_FLAG" group="Flags"/>
+  </register_data>
 </processor_spec>

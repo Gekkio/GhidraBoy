@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Register group "Flags" for the 4 individual flag registers
+
 ### Changed
 
 - Use separate registers for individual flags. This greatly improves
