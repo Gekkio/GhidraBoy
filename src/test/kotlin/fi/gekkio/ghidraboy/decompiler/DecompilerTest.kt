@@ -69,7 +69,7 @@ class DecompilerTest : IntegrationTest() {
             void FUN_0000(void)
             {
                 if (DAT_1234 == '\0') {
-                    write_volatile_1(OCPS,0);
+                    OCPS = 0;
                 }
                 IME(1);
                 return;
