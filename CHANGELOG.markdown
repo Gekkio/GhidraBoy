@@ -17,6 +17,7 @@
 ### Fixed
 
 - Typo in ROM bank memory block comment
+- Fix accidental generation of duplicate data types
 
 ## 20220521 - 2022-05-21
 
