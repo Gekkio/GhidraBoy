@@ -120,9 +120,10 @@ class DecompilerTest : IntegrationTest() {
             assertTrue(it.decompileCompleted()) { "Decompilation did not complete" }
         }.decompiledFunction.c
 
+    private fun formatCode(code: String) = code.lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .joinToString(separator = "\n")
     private fun assertDecompiled(function: ghidra.program.model.listing.Function, @Language("C") code: String) =
-        assertEquals(
-            code.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList(),
-            decompile(function).lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
-        )
+        assertEquals(formatCode(code), formatCode(decompile(function)))
 }
