@@ -20,18 +20,11 @@ define space register type=register_space size=1;
 define register offset=0x00 size=1 [ F A C B E D L H ];
 define register offset=0x00 size=2 [ AF  BC  DE  HL ];
 define register offset=0x08 size=2 [ PC  SP  ];
-define register offset=0x10 size=1 [ C_FLAG H_FLAG N_FLAG Z_FLAG ];
 
-macro packflags(tmp) {
-  tmp = (0x80 * Z_FLAG&1) | (0x40 * N_FLAG&1) | (0x20 * H_FLAG&1) | (0x10 * C_FLAG&1);
-}
-
-macro unpackflags(tmp) {
-  Z_FLAG = (tmp & 0x80) != 0;
-  N_FLAG = (tmp & 0x40) != 0;
-  H_FLAG = (tmp & 0x20) != 0;
-  C_FLAG = (tmp & 0x10) != 0;
-}
+@define C_flag "F[4,1]"
+@define H_flag "F[5,1]"
+@define N_flag "F[6,1]"
+@define Z_flag "F[7,1]"
 
 define token opcode (8)
   op0_8       = (0,7)
@@ -64,18 +57,20 @@ attach variables [ sregpair4_2 dregpair4_2 ] [ BC DE HL SP ];
 attach variables [ qregpair4_2 ] [ BC DE HL AF ];
 
 cc: "NZ" is op3_2=0b00 {
-  local c:1 = !Z_FLAG;
+  local c:1 = ($(Z_flag) == 0);
   export c;
 }
 cc: "Z"  is op3_2=0b01 {
-  export Z_FLAG;
+  local c:1 = $(Z_flag);
+  export c;
 }
 cc: "NC" is op3_2=0b10 {
-  local c:1 = !C_FLAG;
+  local c:1 = ($(C_flag) == 0);
   export c;
 }
 cc: "C"  is op3_2=0b11 {
-  export C_FLAG;
+  local c:1 = $(C_flag);
+  export c;
 }
 
 Addr16: imm16 is imm16 {
@@ -143,98 +138,98 @@ macro pop16(ret16) {
 macro aluAdd(op8) {
   # TODO: double-check flags
   local tmp:1 = A + op8;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = (((A & 0xf) + (op8 & 0xf)) & 0x10) != 0;
-  C_FLAG = carry(A, op8);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = (((A & 0xf) + (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = carry(A, op8);
   A = tmp;
 }
 
 macro aluAdc(op8) {
   # TODO: double-check flags
-  local cy = C_FLAG;
+  local cy = $(C_flag);
   local tmp:1 = A + op8;
-  N_FLAG = 0;
-  H_FLAG = (((A & 0xf) + (op8 & 0xf) + cy) & 0x10) != 0;
-  C_FLAG = carry(A, op8);
+  $(N_flag) = 0;
+  $(H_flag) = (((A & 0xf) + (op8 & 0xf) + cy) & 0x10) != 0;
+  $(C_flag) = carry(A, op8);
   A = tmp + cy;
-  Z_FLAG = (A == 0);
-  C_FLAG = C_FLAG || carry(tmp, cy);
+  $(Z_flag) = (A == 0);
+  $(C_flag) = $(C_flag) || carry(tmp, cy);
 }
 
 macro aluSub(op8) {
   # TODO: double-check flags
   local tmp:1 = A - op8;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 1;
-  H_FLAG = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
-  C_FLAG = A < op8;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = A < op8;
   A = tmp;
 }
 
 macro aluSbc(op8) {
   # TODO: double-check flags
-  local cy = C_FLAG;
+  local cy = $(C_flag);
   local tmp:1 = A - op8;
-  N_FLAG = 1;
-  H_FLAG = (((A & 0xf) - (op8 & 0xf) - cy) & 0x10) != 0;
-  C_FLAG = A < op8;
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf) - cy) & 0x10) != 0;
+  $(C_flag) = A < op8;
   A = tmp - cy;
-  Z_FLAG = (A == 0);
-  C_FLAG = C_FLAG || (tmp < cy);
+  $(Z_flag) = (A == 0);
+  $(C_flag) = $(C_flag) || (tmp < cy);
 }
 
 macro aluAnd(op8) {
   # TODO: double-check flags
   A = A & op8;
-  Z_FLAG = (A == 0);
-  N_FLAG = 0;
-  H_FLAG = 1;
-  C_FLAG = 0;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 1;
+  $(C_flag) = 0;
 }
 
 macro aluXor(op8) {
   # TODO: double-check flags
   A = A ^ op8;
-  Z_FLAG = (A == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = 0;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
 }
 
 macro aluOr(op8) {
   # TODO: double-check flags
   A = A | op8;
-  Z_FLAG = (A == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = 0;
+  $(Z_flag) = (A == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
 }
 
 macro aluCp(op8) {
   # TODO: double-check flags
   local tmp:1 = A - op8;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 1;
-  H_FLAG = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
-  C_FLAG = A < op8;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = (((A & 0xf) - (op8 & 0xf)) & 0x10) != 0;
+  $(C_flag) = A < op8;
 }
 
 macro aluInc(op8) {
   # TODO: double-check flags
   local tmp:1 = op8 + 1;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = ((op8 & 0xf) == 0xf);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = ((op8 & 0xf) == 0xf);
   op8 = tmp;
 }
 
 macro aluDec(op8) {
   # TODO: double-check flags
   local tmp:1 = op8 - 1;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 1;
-  H_FLAG = ((op8 & 0xf) == 0);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 1;
+  $(H_flag) = ((op8 & 0xf) == 0);
   op8 = tmp;
 }
 
@@ -242,10 +237,10 @@ macro aluRlc(op8) {
   # TODO: double-check flags
   local co:1 = (op8 >> 7);
   local tmp:1 = (op8 << 1) | co;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
@@ -253,32 +248,32 @@ macro aluRrc(op8) {
   # TODO: double-check flags
   local co:1 = op8 & 1;
   local tmp:1 = (op8 >> 1) | (co << 7);
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
 macro aluRl(op8) {
   # TODO: double-check flags
   local co:1 = (op8 >> 7);
-  local tmp:1 = (op8 << 1) | C_FLAG;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  local tmp:1 = (op8 << 1) | $(C_flag);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
 macro aluRr(op8) {
   # TODO: double-check flags
   local co:1 = op8 & 1;
-  local tmp:1 = (op8 >> 1) | (C_FLAG << 7);
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  local tmp:1 = (op8 >> 1) | ($(C_flag) << 7);
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
@@ -286,10 +281,10 @@ macro aluSla(op8) {
   # TODO: double-check flags
   local co:1 = op8 >> 7;
   local tmp:1 = op8 << 1;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
@@ -297,20 +292,20 @@ macro aluSra(op8) {
   # TODO: double-check flags
   local co:1 = op8 & 1;
   local tmp:1 = op8 s>> 1;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
 macro aluSwap(op8) {
   # TODO: double-check flags
   local tmp:1 = (op8 >> 4) | (op8 << 4);
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = 0;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = 0;
   op8 = tmp;
 }
 
@@ -318,10 +313,10 @@ macro aluSrl(op8) {
   # TODO: double-check flags
   local co:1 = op8 & 1;
   local tmp:1 = op8 >> 1;
-  Z_FLAG = (tmp == 0);
-  N_FLAG = 0;
-  H_FLAG = 0;
-  C_FLAG = co;
+  $(Z_flag) = (tmp == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 0;
+  $(C_flag) = co;
   op8 = tmp;
 }
 
@@ -329,9 +324,9 @@ macro aluBit(bit, op8) {
   # TODO: double-check flags
   local mask:1 = (1 << bit);
   local tmp:1 = op8;
-  Z_FLAG = ((tmp & mask) == 0);
-  N_FLAG = 0;
-  H_FLAG = 1;
+  $(Z_flag) = ((tmp & mask) == 0);
+  $(N_flag) = 0;
+  $(H_flag) = 1;
 }
 
 macro aluRes(bit, op8) {
