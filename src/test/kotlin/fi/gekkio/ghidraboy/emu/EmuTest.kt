@@ -26,7 +26,7 @@ open class EmuTest : IntegrationTest() {
     protected lateinit var emulator: EmulatorHelper
 
     @BeforeEach
-    private fun beforeEach() {
+    fun beforeEach() {
         val consumer = object {}
         program = ProgramDB("test", language, language.defaultCompilerSpec, consumer)
         program.withTransaction {
@@ -37,7 +37,7 @@ open class EmuTest : IntegrationTest() {
     }
 
     @AfterEach
-    private fun afterEach() {
+    fun afterEach() {
         emulator.dispose()
     }
 }

@@ -85,7 +85,7 @@ class DecompilerTest : IntegrationTest() {
     }
 
     @BeforeEach
-    private fun beforeEach() {
+    fun beforeEach() {
         val consumer = object {}
         program = ProgramDB("test", language, language.defaultCompilerSpec, consumer)
         program.withTransaction {
@@ -97,12 +97,12 @@ class DecompilerTest : IntegrationTest() {
     }
 
     @AfterEach
-    private fun afterEach() {
+    fun afterEach() {
         decompiler.closeProgram()
     }
 
     @AfterAll
-    private fun afterAll() {
+    fun afterAll() {
         decompiler.dispose()
     }
 

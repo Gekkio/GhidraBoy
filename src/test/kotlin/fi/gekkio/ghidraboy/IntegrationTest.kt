@@ -29,7 +29,7 @@ open class IntegrationTest {
     protected lateinit var language: Language
 
     @BeforeAll
-    protected open fun beforeAll() {
+    open fun beforeAll() {
         val defs = ResourceFile(File("data/languages/sm83.ldefs"))
         val provider = SleighLanguageProvider(defs)
         Assertions.assertFalse(provider.hadLoadFailure())

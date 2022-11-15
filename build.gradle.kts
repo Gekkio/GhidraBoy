@@ -18,12 +18,12 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.6.21"
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    kotlin("jvm") version "1.7.21"
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 val ghidraDir = System.getenv("GHIDRA_INSTALL_DIR")
@@ -57,7 +57,7 @@ dependencies {
 
     testImplementation(ghidra)
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(platform("org.junit:junit-bom:5.8.2"))
+    testImplementation(platform("org.junit:junit-bom:5.9.0"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -92,7 +92,7 @@ val compileSleigh by tasks.registering(JavaExec::class) {
         .withPropertyName("outputFile")
 
     classpath = configurations["ghidra"]
-    main = "ghidra.pcodeCPort.slgh_compile.SleighCompile"
+    mainClass.set("ghidra.pcodeCPort.slgh_compile.SleighCompile")
     args = listOf("-u", "-l", "-n", "-t", "-e", "-c", "-f", slaspecFile.absolutePath)
 }
 
