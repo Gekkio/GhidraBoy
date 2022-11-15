@@ -11,7 +11,7 @@
 
 - Use separate registers for individual flags. This greatly improves
   decompilation results
-- Build with Ghidra 10.2
+- Build with Ghidra 10.2.1
 - Build with Java 17
 
 ### Fixed
