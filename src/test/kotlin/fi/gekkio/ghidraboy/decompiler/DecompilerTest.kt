@@ -68,8 +68,8 @@ class DecompilerTest : IntegrationTest() {
             """
             void FUN_0000(void)
             {
-                if (DAT_1234 == '\0') {
-                    OCPS = 0;
+                if ((char)((DAT_1234 == 0) << 7) < '\0') {
+                    OCPS = DAT_1234;
                 }
                 IME(1);
                 return;
