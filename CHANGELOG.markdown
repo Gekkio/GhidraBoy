@@ -9,8 +9,7 @@
 
 ### Changed
 
-- Use separate registers for individual flags. This greatly improves
-  decompilation results
+- Improve decompilation result when checking negative flags (NC, NZ)
 - Build with Ghidra 10.2.1
 - Build with Java 17
 

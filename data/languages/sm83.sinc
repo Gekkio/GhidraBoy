@@ -57,7 +57,7 @@ attach variables [ sregpair4_2 dregpair4_2 ] [ BC DE HL SP ];
 attach variables [ qregpair4_2 ] [ BC DE HL AF ];
 
 cc: "NZ" is op3_2=0b00 {
-  local c:1 = ($(Z_flag) == 0);
+  local c:1 = !$(Z_flag);
   export c;
 }
 cc: "Z"  is op3_2=0b01 {
@@ -65,7 +65,7 @@ cc: "Z"  is op3_2=0b01 {
   export c;
 }
 cc: "NC" is op3_2=0b10 {
-  local c:1 = ($(C_flag) == 0);
+  local c:1 = !$(C_flag);
   export c;
 }
 cc: "C"  is op3_2=0b11 {
