@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Revert unintended change in memory block order
+
 ## 20221115 - 2022-11-15
 
 ### Added
