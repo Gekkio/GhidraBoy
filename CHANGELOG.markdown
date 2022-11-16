@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 20221116 - 2022-11-16
+
+### Changed
+
+- Build with Ghidra 10.2.2
+-
 ### Fixed
 
 - Revert unintended change in memory block order
