@@ -7,7 +7,7 @@
 ### Changed
 
 - Build with Ghidra 10.2.2
--
+
 ### Fixed
 
 - Revert unintended change in memory block order
