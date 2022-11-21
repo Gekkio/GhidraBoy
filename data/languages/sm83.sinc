@@ -236,7 +236,7 @@ macro aluDec(op8) {
 macro aluRlc(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = (x >> 7);
+  local co:1 = x[7,1];
   local tmp:1 = (x << 1) | co;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
@@ -248,8 +248,8 @@ macro aluRlc(op8) {
 macro aluRrc(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = x & 1;
-  local tmp:1 = (x >> 1) | (co << 7);
+  local co:1 = x[0,1];
+  local tmp:1 = (co << 7) | (x >> 1);
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
   $(H_flag) = 0;
@@ -260,7 +260,7 @@ macro aluRrc(op8) {
 macro aluRl(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = (x >> 7);
+  local co:1 = x[7,1];
   local tmp:1 = (x << 1) | $(C_flag);
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
@@ -272,8 +272,8 @@ macro aluRl(op8) {
 macro aluRr(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = x & 1;
-  local tmp:1 = (x >> 1) | ($(C_flag) << 7);
+  local co:1 = x[0,1];
+  local tmp:1 = ($(C_flag) << 7) | (x >> 1);
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
   $(H_flag) = 0;
@@ -284,7 +284,7 @@ macro aluRr(op8) {
 macro aluSla(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = x >> 7;
+  local co:1 = x[7,1];
   local tmp:1 = x << 1;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
@@ -296,7 +296,7 @@ macro aluSla(op8) {
 macro aluSra(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = x & 1;
+  local co:1 = x[0,1];
   local tmp:1 = x s>> 1;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
@@ -308,7 +308,7 @@ macro aluSra(op8) {
 macro aluSwap(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local tmp:1 = (x >> 4) | (x << 4);
+  local tmp:1 = (x[0,4] << 4) | x[4,4];
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
   $(H_flag) = 0;
@@ -319,7 +319,7 @@ macro aluSwap(op8) {
 macro aluSrl(op8) {
   # TODO: double-check flags
   local x:1 = op8;
-  local co:1 = x & 1;
+  local co:1 = x[0,1];
   local tmp:1 = x >> 1;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;

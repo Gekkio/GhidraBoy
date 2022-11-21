@@ -218,7 +218,7 @@
 
 :RLCA is op0_8=0x07 {
   # TODO: double-check flags
-  local co:1 = (A >> 7);
+  local co:1 = A[7,1];
   A = (A << 1) | co;
   $(Z_flag) = 0;
   $(N_flag) = 0;
@@ -228,7 +228,7 @@
 
 :RLA is op0_8=0x17 {
   # TODO: double-check flags
-  local co:1 = (A >> 7);
+  local co:1 = A[7,1];
   A = (A << 1) | $(C_flag);
   $(Z_flag) = 0;
   $(N_flag) = 0;
@@ -238,8 +238,8 @@
 
 :RRCA is op0_8=0x0f {
   # TODO: double-check flags
-  local co:1 = A & 1;
-  A = (A >> 1) | (co << 7);
+  local co:1 = A[0,1];
+  A = (co << 7) | (A >> 1);
   $(Z_flag) = 0;
   $(N_flag) = 0;
   $(H_flag) = 0;
@@ -248,8 +248,8 @@
 
 :RRA is op0_8=0x1f {
   # TODO: double-check flags
-  local co:1 = A & 1;
-  A = (A >> 1) | ($(C_flag) << 7);
+  local co:1 = A[0,1];
+  A = ($(C_flag) << 7) | (A >> 1);
   $(Z_flag) = 0;
   $(N_flag) = 0;
   $(H_flag) = 0;
