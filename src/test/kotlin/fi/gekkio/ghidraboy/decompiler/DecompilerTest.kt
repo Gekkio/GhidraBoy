@@ -20,6 +20,7 @@ import ghidra.program.model.listing.Instruction
 import ghidra.program.model.listing.Parameter
 import ghidra.program.model.listing.ParameterImpl
 import ghidra.program.model.listing.Program
+import ghidra.program.model.listing.ReturnParameterImpl
 import ghidra.program.model.symbol.SourceType
 import ghidra.util.task.TaskMonitor
 import org.intellij.lang.annotations.Language
@@ -159,6 +160,164 @@ class DecompilerTest : IntegrationTest() {
         )
     }
 
+    @Test
+    fun `upper nibble popcount`() {
+        val f = assembleFunction(
+            address(0x0000),
+            """
+  LD D, A
+  XOR A
+  LD E, A
+  SLA D
+  ADC E
+  SLA D
+  ADC E
+  SLA D
+  ADC E
+  SLA D
+  ADC E
+  RET
+            """.trimIndent(),
+            name = "popcnt4_upper",
+            params = listOf(
+                parameter("value", u8, register("A")),
+            ),
+            returnParam = returnParameter(u8, register("A"))
+        )
+        assertDecompiled(
+            f,
+            """
+            byte popcnt4_upper(byte value)
+            {
+                return ((-((char)(value << 1) >> 7) - ((char)value >> 7)) - ((char)(value << 2) >> 7)) -
+                    ((char)(value << 3) >> 7); 
+            }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `read_joypad_state`() {
+        val f = assembleFunction(
+            address(0x0000),
+            """
+  LD A, 0x20
+  LDH (0x00), A
+  LDH A, (0x00)
+  LDH A, (0x00)
+  CPL
+  AND 0x0F
+  SWAP A
+  LD B, A
+  LD A, 0x10
+  LDH (0x00), A
+  LDH A, (0x00)
+  LDH A, (0x00)
+  LDH A, (0x00)
+  LDH A, (0x00)
+  LDH A, (0x00)
+  LDH A, (0x00)
+  CPL
+  AND 0x0F
+  OR B
+  LD B, A
+  LD A, 0x30
+  LDH (0x00), A
+  LD A, B
+  RET
+            """.trimIndent(),
+            name = "read_joypad_state",
+            returnParam = returnParameter(u8, register("A"))
+        )
+        assertDecompiled(
+            f,
+            """
+            byte read_joypad_state(void)
+            {
+                byte bVar1;
+                byte bVar2;
+                P1 = 0x20;
+                bVar1 = P1;
+                P1 = 0x10;
+                bVar2 = P1;
+                P1 = 0x30;
+                return ~bVar2 & 0xf | ~bVar1 << 4;
+            }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `sla8_to_16`() {
+        val f = assembleFunction(
+            address(0x0000),
+            """
+  LD C, A
+  XOR A
+  SLA C
+  RLA
+  SLA C
+  RLA
+  SLA C
+  RLA
+  SLA C
+  RLA
+  LD B, A
+  RET
+            """.trimIndent(),
+            name = "sla8_to_16",
+            params = listOf(
+                parameter("value", u8, register("A"))
+            ),
+            returnParam = returnParameter(u16, register("BC"))
+        )
+        assertDecompiled(
+            f,
+            """
+            word sla8_to_16(byte value)
+            {
+                return CONCAT11((((value >> 7) << 1 | (byte)(value << 1) >> 7) << 1 | (byte)(value << 2) >> 7) <<
+                    1 | (byte)(value << 3) >> 7,value << 4);
+            }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun `DAA decompilation`() {
+        val f = assembleFunction(
+            address(0x0000),
+            """
+  LD A, 0x01
+  ADD C
+  DAA
+  LD C, A
+  RET Z
+  INC C
+  RET
+            """.trimIndent(),
+            name = "daa",
+            params = listOf(
+                parameter("value", u8, register("C"))
+            ),
+            returnParam = returnParameter(u8, register("C"))
+        )
+        assertDecompiled(
+            f,
+            """
+            byte daa(byte value)
+            {
+                byte bVar1;
+                bVar1 = daa(value + 1);
+                if ((byte)(value + 1) == '\0') {
+                    return bVar1;
+                }
+                return bVar1 + 1; 
+            }
+            """.trimIndent()
+        )
+    }
+
     @BeforeAll
     override fun beforeAll() {
         super.beforeAll()
@@ -191,7 +350,8 @@ class DecompilerTest : IntegrationTest() {
         address: Address,
         code: String,
         name: String? = null,
-        params: List<Parameter>? = null
+        params: List<Parameter>? = null,
+        returnParam: Parameter? = null
     ): Function = program.withTransaction {
         val instructions: Iterable<Instruction> = Assemblers.getAssembler(program).assemble(address, *code.lines().toTypedArray())
         val addressSet = AddressSet()
@@ -199,10 +359,26 @@ class DecompilerTest : IntegrationTest() {
             addressSet.add(instruction.minAddress, instruction.maxAddress)
         }
         program.functionManager.createFunction(name, address, addressSet, SourceType.USER_DEFINED).apply {
-            setCallingConvention("default")
+            setCustomVariableStorage(true)
+            val callingConvention = "default"
+            val force = true
             if (params != null) {
-                setCustomVariableStorage(true)
-                replaceParameters(params, Function.FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.USER_DEFINED)
+                updateFunction(
+                    callingConvention,
+                    returnParam,
+                    params,
+                    Function.FunctionUpdateType.CUSTOM_STORAGE,
+                    force,
+                    SourceType.USER_DEFINED
+                )
+            } else {
+                updateFunction(
+                    callingConvention,
+                    returnParam,
+                    Function.FunctionUpdateType.CUSTOM_STORAGE,
+                    force,
+                    SourceType.USER_DEFINED
+                )
             }
         }
     }
@@ -221,6 +397,8 @@ class DecompilerTest : IntegrationTest() {
 
     private fun parameter(name: String, type: DataType, register: Register) =
         ParameterImpl(name, type, register, program)
+    private fun returnParameter(type: DataType, register: Register) =
+        ReturnParameterImpl(type, register, program)
     private fun pointer(type: DataType) = PointerDataType(type)
     private fun register(name: String) = program.getRegister(name)
 }
