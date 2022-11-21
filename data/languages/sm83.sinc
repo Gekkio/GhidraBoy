@@ -136,7 +136,6 @@ macro pop16(ret16) {
 }
 
 macro aluAdd(op8) {
-  # TODO: double-check flags
   local tmp:1 = A + op8;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
@@ -146,19 +145,16 @@ macro aluAdd(op8) {
 }
 
 macro aluAdc(op8) {
-  # TODO: double-check flags
-  local cy = $(C_flag);
-  local tmp:1 = A + op8;
+  local cy:1 = $(C_flag);
+  local tmp:1 = A + op8 + cy;
+  $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
   $(H_flag) = (((A & 0xf) + (op8 & 0xf) + cy) & 0x10) != 0;
-  $(C_flag) = carry(A, op8);
-  A = tmp + cy;
-  $(Z_flag) = (A == 0);
-  $(C_flag) = $(C_flag) || carry(tmp, cy);
+  $(C_flag) = carry(carry(A, op8), cy);
+  A = tmp;
 }
 
 macro aluSub(op8) {
-  # TODO: double-check flags
   local tmp:1 = A - op8;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 1;
@@ -168,19 +164,16 @@ macro aluSub(op8) {
 }
 
 macro aluSbc(op8) {
-  # TODO: double-check flags
   local cy = $(C_flag);
-  local tmp:1 = A - op8;
+  local tmp:1 = A - op8 - cy;
+  $(Z_flag) = (A == 0);
   $(N_flag) = 1;
   $(H_flag) = (((A & 0xf) - (op8 & 0xf) - cy) & 0x10) != 0;
-  $(C_flag) = A < op8;
-  A = tmp - cy;
-  $(Z_flag) = (A == 0);
-  $(C_flag) = $(C_flag) || (tmp < cy);
+  $(C_flag) = A < (op8 + cy);
+  A = tmp;
 }
 
 macro aluAnd(op8) {
-  # TODO: double-check flags
   A = A & op8;
   $(Z_flag) = (A == 0);
   $(N_flag) = 0;
@@ -189,7 +182,6 @@ macro aluAnd(op8) {
 }
 
 macro aluXor(op8) {
-  # TODO: double-check flags
   A = A ^ op8;
   $(Z_flag) = (A == 0);
   $(N_flag) = 0;
@@ -198,7 +190,6 @@ macro aluXor(op8) {
 }
 
 macro aluOr(op8) {
-  # TODO: double-check flags
   A = A | op8;
   $(Z_flag) = (A == 0);
   $(N_flag) = 0;
@@ -207,7 +198,6 @@ macro aluOr(op8) {
 }
 
 macro aluCp(op8) {
-  # TODO: double-check flags
   local tmp:1 = A - op8;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 1;
@@ -216,19 +206,19 @@ macro aluCp(op8) {
 }
 
 macro aluInc(op8) {
-  # TODO: double-check flags
   local tmp:1 = op8 + 1;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 0;
+  # TODO: check which one is better for decompilation: (op8 & 0xf) == 0xf  vs  (((op8 & 0xf) + 1) & 0x10) != 0
   $(H_flag) = ((op8 & 0xf) == 0xf);
   op8 = tmp;
 }
 
 macro aluDec(op8) {
-  # TODO: double-check flags
   local tmp:1 = op8 - 1;
   $(Z_flag) = (tmp == 0);
   $(N_flag) = 1;
+  # TODO: check which one is better for decompilation: (op8 & 0xf) == 0  vs  (((op8 & 0xf) - 1) & 0x10) != 0
   $(H_flag) = ((op8 & 0xf) == 0);
   op8 = tmp;
 }
