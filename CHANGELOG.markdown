@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- DAA pseudo op tracks data dependencies much better
+
 ## 20221116 - 2022-11-16
 
 ### Changed

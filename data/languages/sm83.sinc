@@ -121,7 +121,7 @@ HiMem8: (imm8) is imm8 {
 }
 
 define pcodeop IME;
-define pcodeop daa;
+define pcodeop daaOperand;
 define pcodeop halt;
 define pcodeop stop;
 

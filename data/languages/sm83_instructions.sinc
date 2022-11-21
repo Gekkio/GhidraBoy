@@ -457,7 +457,14 @@
 }
 
 :DAA is op0_8=0x27 {
-  A = daa(A);
+  local op8:1 = 0;
+  op8 = daaOperand(A, $(C_flag), $(H_flag), $(N_flag));
+  local tmp:1 = A + op8;
+  local co:1 = carry(A, op8);
+  $(Z_flag) = (tmp == 0);
+  $(H_flag) = 0;
+  $(C_flag) = $(C_flag) || ((!$(N_flag)) && co);
+  A = tmp;
 }
 
 :CPL is op0_8=0x2f {

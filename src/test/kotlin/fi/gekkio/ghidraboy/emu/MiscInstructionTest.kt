@@ -66,7 +66,9 @@ class MiscInstructionTest : EmuTest() {
 
     @Test
     fun `DAA`() {
-        emulator.registerCallOtherCallback("daa", IgnorePCode())
+        emulator.registerCallOtherCallback("daaOperand", IgnorePCode())
+        emulator.writeF(0b0000_0000u)
+        emulator.writeA(0x00u)
         emulator.write(0x0000u, 0x27u)
         emulator.step()
         emulator.assertPC(0x0001u)
