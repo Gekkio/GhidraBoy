@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 20230420 - 2023-04-20
+
+### Changed
+
+- Build with Ghidra 10.2.3
+
 ### Fixed
 
 - DAA pseudo op tracks data dependencies much better
