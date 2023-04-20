@@ -15,9 +15,10 @@ jobs:
       GHIDRA_SHA256: daf4d85ec1a8ca55bf766e97ec43a14b519cbd1060168e4ec45d429d23c31c38
       GHIDRA_INSTALL_DIR: /home/runner/ghidra
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
         with:
+          distribution: 'temurin'
           java-version: '17'
       - name: Install Ghidra
         run: .github/scripts/install_ghidra.sh
