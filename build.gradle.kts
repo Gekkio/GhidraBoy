@@ -27,8 +27,8 @@ repositories {
 }
 
 val ghidraDir = System.getenv("GHIDRA_INSTALL_DIR")
-        ?: (project.findProperty("ghidra.dir") as? String)
-        ?: throw IllegalStateException("Can't find Ghidra installation")
+    ?: (project.findProperty("ghidra.dir") as? String)
+    ?: throw IllegalStateException("Can't find Ghidra installation")
 
 val ghidraProps = Properties().apply { file("$ghidraDir/Ghidra/application.properties").inputStream().use { load(it) } }
 val ghidraVersion = ghidraProps.getProperty("application.version")!!
@@ -49,7 +49,7 @@ tasks.withType<KotlinCompile> {
 
 val ghidraJars =
     fileTree("$ghidraDir/Ghidra/Framework") { include("**/*.jar") } +
-    fileTree("$ghidraDir/Ghidra/Features") { include("**/*.jar") }
+        fileTree("$ghidraDir/Ghidra/Features") { include("**/*.jar") }
 
 val sleigh: Configuration by configurations.creating
 
@@ -72,11 +72,11 @@ val generateExtensionProps by tasks.registering() {
         output.outputStream().use {
             val props = Properties()
             props += mapOf(
-                    ("name" to "GhidraBoy"),
-                    ("description" to "Support for Sharp SM83 / Game Boy"),
-                    ("author" to "Gekkio"),
-                    ("createdOn" to LocalDate.now().toString()),
-                    ("version" to ghidraVersion)
+                ("name" to "GhidraBoy"),
+                ("description" to "Support for Sharp SM83 / Game Boy"),
+                ("author" to "Gekkio"),
+                ("createdOn" to LocalDate.now().toString()),
+                ("version" to ghidraVersion)
             )
             props.store(it, null)
         }
@@ -88,10 +88,10 @@ val compileSleigh by tasks.registering(JavaExec::class) {
     val slaFile = file("data/languages/sm83.sla")
 
     inputs.files(fileTree("data/languages").include("*.slaspec", "*.sinc"))
-            .withPropertyName("sourceFiles")
-            .withPathSensitivity(PathSensitivity.RELATIVE)
+        .withPropertyName("sourceFiles")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.files(slaFile)
-            .withPropertyName("outputFile")
+        .withPropertyName("outputFile")
 
     classpath = sleigh
     mainClass.set("ghidra.pcodeCPort.slgh_compile.SleighCompile")

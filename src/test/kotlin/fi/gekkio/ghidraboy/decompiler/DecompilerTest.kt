@@ -105,7 +105,7 @@ class DecompilerTest : IntegrationTest() {
             params = listOf(
                 parameter("dst", pointer(u8), register("HL")),
                 parameter("src", pointer(u8), register("DE")),
-                parameter("len", u16, register("BC")),
+                parameter("len", u16, register("BC"))
             )
         )
         assertDecompiled(
@@ -142,7 +142,7 @@ class DecompilerTest : IntegrationTest() {
             params = listOf(
                 parameter("dst", pointer(u8), register("HL")),
                 parameter("val", u8, register("A")),
-                parameter("len", u16, register("BC")),
+                parameter("len", u16, register("BC"))
             )
         )
         assertDecompiled(
@@ -180,7 +180,7 @@ class DecompilerTest : IntegrationTest() {
             """.trimIndent(),
             name = "popcnt4_upper",
             params = listOf(
-                parameter("value", u8, register("A")),
+                parameter("value", u8, register("A"))
             ),
             returnParam = returnParameter(u8, register("A"))
         )
