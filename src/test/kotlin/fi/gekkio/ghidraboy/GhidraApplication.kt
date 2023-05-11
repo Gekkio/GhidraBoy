@@ -13,8 +13,10 @@
 // limitations under the License.
 package fi.gekkio.ghidraboy
 
+import generic.jar.ResourceFile
 import ghidra.GhidraApplicationLayout
 import ghidra.framework.Application
+import ghidra.framework.GModule
 import ghidra.framework.HeadlessGhidraApplicationConfiguration
 import org.junit.jupiter.api.extension.Extension
 
@@ -28,7 +30,14 @@ class GhidraApplication : Extension {
 
         fun initialize() = synchronized(this) {
             if (initialized) return
-            val layout = GhidraApplicationLayout()
+            val layout = object : GhidraApplicationLayout() {
+                override fun findGhidraModules(): MutableMap<String, GModule> = mutableMapOf(
+                    "GhidraBoy" to
+                        GModule(applicationRootDirs, ResourceFile("./"))
+                ).apply {
+                    putAll(super.findGhidraModules())
+                }
+            }
             val configuration = HeadlessGhidraApplicationConfiguration()
             Application.initializeApplication(layout, configuration)
             initialized = true

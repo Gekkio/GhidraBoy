@@ -26,16 +26,16 @@ fun EmulatorHelper.step() {
 }
 
 fun EmulatorHelper.write(address: UShort, vararg bytes: UByte) = writeMemory(
-    emulator.language.addressFactory.defaultAddressSpace.getAddress(address.toLong()),
+    language.addressFactory.defaultAddressSpace.getAddress(address.toLong()),
     bytes.map { it.toByte() }.toByteArray()
 )
 
 fun EmulatorHelper.read(address: UShort): UByte = readMemoryByte(
-    emulator.language.addressFactory.defaultAddressSpace.getAddress(address.toLong())
+    language.addressFactory.defaultAddressSpace.getAddress(address.toLong())
 ).toUByte()
 
 fun EmulatorHelper.read(address: UShort, length: Int): UByteArray = readMemory(
-    emulator.language.addressFactory.defaultAddressSpace.getAddress(address.toLong()),
+    language.addressFactory.defaultAddressSpace.getAddress(address.toLong()),
     length
 ).map { it.toUByte() }.toUByteArray()
 

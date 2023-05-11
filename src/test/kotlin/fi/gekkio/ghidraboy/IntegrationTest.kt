@@ -13,7 +13,6 @@
 // limitations under the License.
 package fi.gekkio.ghidraboy
 
-import generic.jar.ResourceFile
 import ghidra.app.plugin.processors.sleigh.SleighLanguageProvider
 import ghidra.program.model.address.Address
 import ghidra.program.model.lang.Language
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import java.io.File
 
 @ExtendWith(GhidraApplication::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,14 +28,11 @@ open class IntegrationTest {
 
     @BeforeAll
     open fun beforeAll() {
-        val defs = ResourceFile(File("data/languages/sm83.ldefs"))
-        val provider = SleighLanguageProvider(defs)
+        val provider = SleighLanguageProvider.getSleighLanguageProvider()
         Assertions.assertFalse(provider.hadLoadFailure())
-        val languageDescription = provider.languageDescriptions.single()
-
-        Assertions.assertEquals("Sharp SM83", languageDescription.description)
-        Assertions.assertEquals("SM83", languageDescription.processor.toString())
-
+        val languageDescription = provider.languageDescriptions.filter {
+            it.description == "Sharp SM83" && it.processor.toString() == "SM83"
+        }.single()
         language = provider.getLanguage(languageDescription.languageID)
     }
 
