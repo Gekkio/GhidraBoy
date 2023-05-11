@@ -18,11 +18,9 @@ import ghidra.app.util.Option;
 import ghidra.app.util.OptionUtils;
 import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.importer.MessageLog;
-import ghidra.app.util.opinion.AbstractProgramLoader;
-import ghidra.app.util.opinion.LoadSpec;
-import ghidra.app.util.opinion.LoaderTier;
-import ghidra.framework.model.DomainFolder;
+import ghidra.app.util.opinion.*;
 import ghidra.framework.model.DomainObject;
+import ghidra.framework.model.Project;
 import ghidra.program.database.function.OverlappingFunctionException;
 import ghidra.program.model.address.AddressOverflowException;
 import ghidra.program.model.address.AddressSet;
@@ -105,14 +103,14 @@ public class GameBoyLoader extends AbstractProgramLoader {
     }
 
     @Override
-    protected List<LoadedProgram> loadProgram(ByteProvider provider, String programName, DomainFolder programFolder, LoadSpec loadSpec, List<Option> options, MessageLog log, Object consumer, TaskMonitor monitor) throws IOException, CancelledException {
-        var result = new ArrayList<LoadedProgram>();
+    protected List<Loaded<Program>> loadProgram(ByteProvider provider, String loadedName, Project project, String projectFolderPath, LoadSpec loadSpec, List<Option> options, MessageLog log, Object consumer, TaskMonitor monitor) throws IOException, CancelledException {
+        var result = new ArrayList<Loaded<Program>>();
         var pair = loadSpec.getLanguageCompilerSpec();
         var language = getLanguageService().getLanguage(pair.languageID);
         var compiler = language.getCompilerSpecByID(pair.compilerSpecID);
 
         var baseAddress = language.getAddressFactory().getDefaultAddressSpace().getAddress(0);
-        var program = createProgram(provider, programName, baseAddress, getName(), language, compiler, consumer);
+        var program = createProgram(provider, loadedName, baseAddress, getName(), language, compiler, consumer);
         var success = false;
         try {
             var kind = OptionUtils.getOption(OPT_KIND, options, GameBoyKind.GB);
@@ -124,22 +122,21 @@ public class GameBoyLoader extends AbstractProgramLoader {
                     program.endTransaction(id, true);
                 }
             }
-            if (loadInto(provider, loadSpec, options, log, program, monitor)) {
-                createDefaultMemoryBlocks(program, language, log);
+            loadInto(provider, loadSpec, options, log, program, monitor);
+            createDefaultMemoryBlocks(program, language, log);
 
-                if (OptionUtils.getBooleanOptionValue(OPT_HW_BLOCKS, options, true)) {
-                    int id = program.startTransaction("Create GB hardware memory blocks");
-                    try {
-                        addHardwareBlocks(program, kind, log);
-                        populateHardwareBlocks(program, kind);
-                    } catch (InvalidInputException | CodeUnitInsertionException e) {
-                        log.appendException(e);
-                    } finally {
-                        program.endTransaction(id, true);
-                    }
+            if (OptionUtils.getBooleanOptionValue(OPT_HW_BLOCKS, options, true)) {
+                int id = program.startTransaction("Create GB hardware memory blocks");
+                try {
+                    addHardwareBlocks(program, kind, log);
+                    populateHardwareBlocks(program, kind);
+                } catch (InvalidInputException | CodeUnitInsertionException e) {
+                    log.appendException(e);
+                } finally {
+                    program.endTransaction(id, true);
                 }
-                success = result.add(new LoadedProgram(program, programFolder));
             }
+            success = result.add(new Loaded<>(program, loadedName, projectFolderPath));
         } finally {
             if (!success) {
                 program.release(consumer);
@@ -149,7 +146,7 @@ public class GameBoyLoader extends AbstractProgramLoader {
     }
 
     @Override
-    protected boolean loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor) throws IOException, CancelledException {
+    protected void loadProgramInto(ByteProvider provider, LoadSpec loadSpec, List<Option> options, MessageLog log, Program program, TaskMonitor monitor) throws IOException, CancelledException {
         var as = program.getAddressFactory().getDefaultAddressSpace();
 
         var bootRom = detectBootRom(provider);
@@ -228,6 +225,5 @@ public class GameBoyLoader extends AbstractProgramLoader {
                 log.appendException(e);
             }
         }
-        return true;
     }
 }
