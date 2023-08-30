@@ -66,10 +66,10 @@ dependencies {
 }
 
 val generateExtensionProps by tasks.registering() {
-    val output = file("$buildDir/generated/extension.properties")
+    val output = layout.buildDirectory.file("generated/extension.properties")
     outputs.file(output)
     doLast {
-        output.outputStream().use {
+        file(output).outputStream().use {
             val props = Properties()
             props += mapOf(
                 ("name" to "GhidraBoy"),
