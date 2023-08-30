@@ -18,8 +18,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.8.21"
-    id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
+    kotlin("jvm") version "1.9.10"
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
 }
 
 repositories {
@@ -59,7 +59,7 @@ dependencies {
 
     testImplementation(ghidraJars)
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
