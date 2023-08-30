@@ -26,8 +26,8 @@ repositories {
     mavenCentral()
 }
 
-val ghidraDir = System.getenv("GHIDRA_INSTALL_DIR")
-    ?: (project.findProperty("ghidra.dir") as? String)
+val ghidraDir = (project.findProperty("ghidra.dir") as? String)
+    ?: System.getenv("GHIDRA_INSTALL_DIR")
     ?: throw IllegalStateException("Can't find Ghidra installation")
 
 val ghidraProps = Properties().apply { file("$ghidraDir/Ghidra/application.properties").inputStream().use { load(it) } }
