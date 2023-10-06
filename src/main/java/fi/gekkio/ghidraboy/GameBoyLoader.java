@@ -67,11 +67,6 @@ public class GameBoyLoader extends AbstractProgramLoader {
     }
 
     @Override
-    public boolean supportsLoadIntoProgram() {
-        return true;
-    }
-
-    @Override
     public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
         var result = new ArrayList<LoadSpec>();
         if (detectBootRom(provider).isPresent() || detectRom(provider).isPresent()) {
