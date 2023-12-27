@@ -26,9 +26,10 @@ repositories {
     mavenCentral()
 }
 
-val ghidraDir = (project.findProperty("ghidra.dir") as? String)
-    ?: System.getenv("GHIDRA_INSTALL_DIR")
-    ?: throw IllegalStateException("Can't find Ghidra installation")
+val ghidraDir =
+    (project.findProperty("ghidra.dir") as? String)
+        ?: System.getenv("GHIDRA_INSTALL_DIR")
+        ?: throw IllegalStateException("Can't find Ghidra installation")
 
 val ghidraProps = Properties().apply { file("$ghidraDir/Ghidra/application.properties").inputStream().use { load(it) } }
 val ghidraVersion = ghidraProps.getProperty("application.version")!!
@@ -65,19 +66,20 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
-val generateExtensionProps by tasks.registering() {
+val generateExtensionProps by tasks.registering {
     val output = layout.buildDirectory.file("generated/extension.properties")
     outputs.file(output)
     doLast {
         file(output).outputStream().use {
             val props = Properties()
-            props += mapOf(
-                ("name" to "GhidraBoy"),
-                ("description" to "Support for Sharp SM83 / Game Boy"),
-                ("author" to "Gekkio"),
-                ("createdOn" to LocalDate.now().toString()),
-                ("version" to ghidraVersion)
-            )
+            props +=
+                mapOf(
+                    ("name" to "GhidraBoy"),
+                    ("description" to "Support for Sharp SM83 / Game Boy"),
+                    ("author" to "Gekkio"),
+                    ("createdOn" to LocalDate.now().toString()),
+                    ("version" to ghidraVersion),
+                )
             props.store(it, null)
         }
     }

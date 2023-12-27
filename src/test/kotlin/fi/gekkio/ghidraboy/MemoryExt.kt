@@ -18,5 +18,9 @@ import ghidra.program.model.mem.Memory
 import ghidra.program.model.mem.MemoryBlock
 import ghidra.util.task.TaskMonitor
 
-fun Memory.loadBytes(name: String, start: Address, bytes: ByteArray, overlay: Boolean = false): MemoryBlock =
-    createInitializedBlock(name, start, bytes.inputStream(), bytes.size.toLong(), TaskMonitor.DUMMY, overlay)
+fun Memory.loadBytes(
+    name: String,
+    start: Address,
+    bytes: ByteArray,
+    overlay: Boolean = false,
+): MemoryBlock = createInitializedBlock(name, start, bytes.inputStream(), bytes.size.toLong(), TaskMonitor.DUMMY, overlay)

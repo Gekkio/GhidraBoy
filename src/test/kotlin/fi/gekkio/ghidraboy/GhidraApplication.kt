@@ -28,19 +28,22 @@ class GhidraApplication : Extension {
     companion object {
         private var initialized = false
 
-        fun initialize() = synchronized(this) {
-            if (initialized) return
-            val layout = object : GhidraApplicationLayout() {
-                override fun findGhidraModules(): MutableMap<String, GModule> = mutableMapOf(
-                    "GhidraBoy" to
-                        GModule(applicationRootDirs, ResourceFile("./"))
-                ).apply {
-                    putAll(super.findGhidraModules())
-                }
+        fun initialize() =
+            synchronized(this) {
+                if (initialized) return
+                val layout =
+                    object : GhidraApplicationLayout() {
+                        override fun findGhidraModules(): MutableMap<String, GModule> =
+                            mutableMapOf(
+                                "GhidraBoy" to
+                                    GModule(applicationRootDirs, ResourceFile("./")),
+                            ).apply {
+                                putAll(super.findGhidraModules())
+                            }
+                    }
+                val configuration = HeadlessGhidraApplicationConfiguration()
+                Application.initializeApplication(layout, configuration)
+                initialized = true
             }
-            val configuration = HeadlessGhidraApplicationConfiguration()
-            Application.initializeApplication(layout, configuration)
-            initialized = true
-        }
     }
 }

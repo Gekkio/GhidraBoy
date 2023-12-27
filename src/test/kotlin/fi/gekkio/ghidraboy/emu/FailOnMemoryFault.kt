@@ -20,7 +20,12 @@ import ghidra.program.model.address.Address
 import org.junit.jupiter.api.Assertions
 
 class FailOnMemoryFault(private val emulator: EmulatorHelper) : MemoryFaultHandler {
-    override fun uninitializedRead(address: Address, size: Int, buf: ByteArray, bufOffset: Int): Boolean {
+    override fun uninitializedRead(
+        address: Address,
+        size: Int,
+        buf: ByteArray,
+        bufOffset: Int,
+    ): Boolean {
         if (emulator.emulateExecutionState == EmulateExecutionState.INSTRUCTION_DECODE) {
             return false
         }
@@ -32,7 +37,10 @@ class FailOnMemoryFault(private val emulator: EmulatorHelper) : MemoryFaultHandl
         return true
     }
 
-    override fun unknownAddress(address: Address, write: Boolean): Boolean {
+    override fun unknownAddress(
+        address: Address,
+        write: Boolean,
+    ): Boolean {
         val pc = emulator.executionAddress
         if (write) {
             Assertions.fail<Unit>("Unknown address written at $pc: $address")

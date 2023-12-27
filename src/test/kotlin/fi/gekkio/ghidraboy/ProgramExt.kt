@@ -15,7 +15,10 @@ package fi.gekkio.ghidraboy
 
 import ghidra.program.model.listing.Program
 
-inline fun <T> Program.withTransaction(description: String = "", crossinline f: () -> T): T {
+inline fun <T> Program.withTransaction(
+    description: String = "",
+    crossinline f: () -> T,
+): T {
     var success = false
     val id = startTransaction(description)
     try {

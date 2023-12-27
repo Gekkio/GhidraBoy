@@ -42,7 +42,10 @@ class ControlFlowInstructionTest : EmuTest() {
 
     @ParameterizedTest
     @ArgumentsSource(Conditions::class)
-    fun `JP cc, nn`(cc: Condition, taken: Boolean) {
+    fun `JP cc, nn`(
+        cc: Condition,
+        taken: Boolean,
+    ) {
         emulator.writeF((if (taken) cc else cc.flip()).testFlags)
         emulator.write(0x000u, cc.jpOpcode, 0x34u, 0x12u)
         emulator.step()
@@ -69,7 +72,10 @@ class ControlFlowInstructionTest : EmuTest() {
 
     @ParameterizedTest
     @ArgumentsSource(Conditions::class)
-    fun `JR cc, e (positive)`(cc: Condition, taken: Boolean) {
+    fun `JR cc, e (positive)`(
+        cc: Condition,
+        taken: Boolean,
+    ) {
         emulator.writeF((if (taken) cc else cc.flip()).testFlags)
         emulator.write(0x000u, cc.jrOpcode, 0x7fu)
         emulator.step()
@@ -82,7 +88,10 @@ class ControlFlowInstructionTest : EmuTest() {
 
     @ParameterizedTest
     @ArgumentsSource(Conditions::class)
-    fun `JR cc, e (negative)`(cc: Condition, taken: Boolean) {
+    fun `JR cc, e (negative)`(
+        cc: Condition,
+        taken: Boolean,
+    ) {
         emulator.writeF((if (taken) cc else cc.flip()).testFlags)
         emulator.write(0x000u, cc.jrOpcode, 0x80u)
         emulator.step()
@@ -108,7 +117,10 @@ class ControlFlowInstructionTest : EmuTest() {
 
     @ParameterizedTest
     @ArgumentsSource(Conditions::class)
-    fun `CALL cc, nn`(cc: Condition, taken: Boolean) {
+    fun `CALL cc, nn`(
+        cc: Condition,
+        taken: Boolean,
+    ) {
         emulator.writePC(0xabcdu)
         emulator.writeSP(0xbfffu)
         emulator.writeF((if (taken) cc else cc.flip()).testFlags)
@@ -139,7 +151,10 @@ class ControlFlowInstructionTest : EmuTest() {
 
     @ParameterizedTest
     @ArgumentsSource(Conditions::class)
-    fun `RET cc, nn`(cc: Condition, taken: Boolean) {
+    fun `RET cc, nn`(
+        cc: Condition,
+        taken: Boolean,
+    ) {
         emulator.writePC(0x1234u)
         emulator.writeSP(0xbffdu)
         emulator.writeF((if (taken) cc else cc.flip()).testFlags)
@@ -197,7 +212,7 @@ enum class Rst(val opcode: UByte, val target: UShort) {
     Rst20(0xe7u, 0x0020u),
     Rst28(0xefu, 0x0028u),
     Rst30(0xf7u, 0x0030u),
-    Rst38(0xffu, 0x0038u)
+    Rst38(0xffu, 0x0038u),
 }
 
 enum class Condition(
@@ -205,17 +220,19 @@ enum class Condition(
     val jrOpcode: UByte,
     val jpOpcode: UByte,
     val callOpcode: UByte,
-    val retOpcode: UByte
+    val retOpcode: UByte,
 ) {
     NC(0b1110_0000u, 0x30u, 0xd2u, 0xd4u, 0xd0u),
     C(0b0001_0000u, 0x38u, 0xdau, 0xdcu, 0xd8u),
     NZ(0b0111_0000u, 0x20u, 0xc2u, 0xc4u, 0xc0u),
-    Z(0b1000_0000u, 0x28u, 0xcau, 0xccu, 0xc8u);
+    Z(0b1000_0000u, 0x28u, 0xcau, 0xccu, 0xc8u),
+    ;
 
-    fun flip(): Condition = when (this) {
-        NC -> C
-        C -> NC
-        NZ -> Z
-        Z -> NZ
-    }
+    fun flip(): Condition =
+        when (this) {
+            NC -> C
+            C -> NC
+            NZ -> Z
+            Z -> NZ
+        }
 }

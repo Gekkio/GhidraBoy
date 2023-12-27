@@ -757,13 +757,14 @@ class DisassemblyTest : IntegrationTest() {
     fun `can disassemble XOR n`() = test(0xee, "XOR 0x55", 0x55)
 
     @Test
-    fun `can disassemble RST 0x28`() = test(0xef, "RST 0x0028") {
-        val helper = EmulatorHelper(it.program)
-        helper.writeRegister("SP", 0xffff)
-        helper.step(TaskMonitor.DUMMY)
-        println(helper.readRegister("SP"))
-        println(helper.readRegister("PC"))
-    }
+    fun `can disassemble RST 0x28`() =
+        test(0xef, "RST 0x0028") {
+            val helper = EmulatorHelper(it.program)
+            helper.writeRegister("SP", 0xffff)
+            helper.step(TaskMonitor.DUMMY)
+            println(helper.readRegister("SP"))
+            println(helper.readRegister("PC"))
+        }
 
     @Test
     fun `can disassemble LDH A, (n)`() = test(0xf0, "LDH A,(0x55)", 0x55)
@@ -816,7 +817,12 @@ class DisassemblyTest : IntegrationTest() {
     @Test
     fun `can disassemble RST 0x38`() = test(0xff, "RST 0x0038")
 
-    private fun test(opcode: Int, expected: String, vararg args: Int, assertions: (codeUnit: CodeUnit) -> Unit = {}) {
+    private fun test(
+        opcode: Int,
+        expected: String,
+        vararg args: Int,
+        assertions: (codeUnit: CodeUnit) -> Unit = {},
+    ) {
         val codeUnit = disassemble(byteArrayOf(opcode.toByte(), *(args.map { it.toByte() }).toByteArray()))
         assertEquals(expected, codeUnit.toString())
         assertions(codeUnit)
