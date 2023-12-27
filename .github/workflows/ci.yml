@@ -15,12 +15,12 @@ jobs:
       GHIDRA_SHA256: 6911d674798f145f8ea723fdd3eb67a8fae8c7be92e117bca081e6ef66acac19
       GHIDRA_INSTALL_DIR: /home/runner/ghidra
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
       - name: Install Ghidra
         run: .github/scripts/install_ghidra.sh
-      - run: ./gradlew assemble
-      - run: ./gradlew test
+      - run: ./gradlew build

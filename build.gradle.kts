@@ -18,8 +18,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.9.10"
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
+    kotlin("jvm") version "1.9.21"
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
 repositories {
@@ -59,7 +59,7 @@ dependencies {
 
     testImplementation(ghidraJars)
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.10.1"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -136,5 +136,5 @@ tasks.named<Test>("test") {
 defaultTasks("clean", "assemble")
 
 ktlint {
-    setVersion("1.0.0")
+    setVersion("1.1.0")
 }
