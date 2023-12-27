@@ -24,3 +24,8 @@ jobs:
       - name: Install Ghidra
         run: .github/scripts/install_ghidra.sh
       - run: ./gradlew build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distribution
+          path: build/distributions/*.zip
+          if-no-files-found: 'error'
