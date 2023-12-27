@@ -1,9 +1,5 @@
 name: ci
-on:
-  pull_request:
-  push:
-    branches:
-    - main
+on: push
 
 jobs:
   build_and_test:
@@ -27,5 +23,23 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: distribution
-          path: build/distributions/*.zip
+          path: build/distributions/*_GhidraBoy.zip
           if-no-files-found: 'error'
+  release:
+    if: github.ref_type == "tag"
+    name: Create draft release
+    runs-on: ubuntu-latest
+    needs: build_and_test
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: distribution
+      - name: Create release and upload distribution
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create --draft "${{ github.ref_name }}"
+          gh release upload "${{ github.ref_name }}" *_GhidraBoy.zip
