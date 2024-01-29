@@ -28,7 +28,7 @@ jobs:
       - run: ./gradlew build -PGHIDRA_INSTALL_DIR=${{ env.GHIDRA_INSTALL_DIR }}
       - uses: actions/upload-artifact@v4
         with:
-          name: distribution
+          name: GhidraBoy_Ghidra_${{ matrix.ghidra }}
           path: build/distributions/*_GhidraBoy.zip
           if-no-files-found: 'error'
   release:
@@ -41,11 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-        with:
-          name: distribution
       - name: Create release and upload distribution
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create --verify-tag --generate-notes --draft "${{ github.ref_name }}"
-          gh release upload "${{ github.ref_name }}" *_GhidraBoy.zip
+          gh release upload "${{ github.ref_name }}" GhidraBoy_Ghidra_*/*.zip
