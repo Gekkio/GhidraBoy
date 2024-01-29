@@ -1,16 +1,23 @@
 name: ci
 on: push
 
-env:
-  GHIDRA_VERSION: "11.0"
-  GHIDRA_BUILD_DATE: 20231222
-  GHIDRA_SHA256: f1f240f91cf6b1dffc9a4148384ee3c6b269a8ae27c6f981577973e00043ad94
-  GHIDRA_INSTALL_DIR: /home/runner/ghidra
-
 jobs:
   build_and_test:
     name: Build + test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghidra:
+          - "11.0"
+          - "10.4"
+          - "10.3.3"
+          - "10.3.2"
+          - "10.3.1"
+          - "10.3"
+          - "10.2.3"
+          - "10.2.2"
+          - "10.2.1"
+          - "10.2"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -18,9 +25,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
-      - name: Install Ghidra
-        run: .github/scripts/install_ghidra.sh
-      - run: ./gradlew build
+      - uses: antoniovazquezblanco/setup-ghidra@v1.2.0
+        with:
+          auth_token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ matrix.ghidra }}
+      - run: ./gradlew build -PGHIDRA_INSTALL_DIR=${{ env.GHIDRA_INSTALL_DIR }}
       - uses: actions/upload-artifact@v4
         with:
           name: distribution
