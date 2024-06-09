@@ -1,16 +1,47 @@
 name: ci
-on: push
+on: [push, pull_request, workflow_dispatch]
 
 env:
-  GHIDRA_VERSION: "11.0"
-  GHIDRA_BUILD_DATE: 20231222
-  GHIDRA_SHA256: f1f240f91cf6b1dffc9a4148384ee3c6b269a8ae27c6f981577973e00043ad94
   GHIDRA_INSTALL_DIR: /home/runner/ghidra
 
 jobs:
   build_and_test:
     name: Build + test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - ghidra_version: "11.0.3"
+            ghidra_build_date: "20240410"
+            ghidra_sha256: "2462a2d0ab11e30f9e907cd3b4aa6b48dd2642f325617e3d922c28e752be6761"
+          - ghidra_version: "11.0.2"
+            ghidra_build_date: "20240326"
+            ghidra_sha256: "4f16ae3f288f8c01fd1872e8e55b25c79744e7b1e8a9383c5e576668ca7d1906"
+          - ghidra_version: "11.0.1"
+            ghidra_build_date: "20240130"
+            ghidra_sha256: "a0bc9450aa3a231096b13a823c66311b9f84cb9cec4624393221cfed40ef6924"
+          - ghidra_version: "11.0"
+            ghidra_build_date: "20231222"
+            ghidra_sha256: "f1f240f91cf6b1dffc9a4148384ee3c6b269a8ae27c6f981577973e00043ad94"
+          - ghidra_version: "10.4"
+            ghidra_build_date: "20230928"
+            ghidra_sha256: "6911d674798f145f8ea723fdd3eb67a8fae8c7be92e117bca081e6ef66acac19"
+          - ghidra_version: "10.3.3"
+            ghidra_build_date: "20230829"
+            ghidra_sha256: "63833361bea8ef5ada1bc28cd2aa2ae4ab43204d2672b595500372582152eebe"
+          - ghidra_version: "10.3.2"
+            ghidra_build_date: "20230711"
+            ghidra_sha256: "a658677a87d0be12ab65bd7962f471875b81a2dd2ea35d69cc3201555ca1bd6f"
+          - ghidra_version: "10.3.1"
+            ghidra_build_date: "20230614"
+            ghidra_sha256: "0413b679436039cc136b950a6d8c24e80ce79da0a0a48993dfacee671b1c7974"
+          - ghidra_version: "10.3"
+            ghidra_build_date: "20230510"
+            ghidra_sha256: "4e990af9b22be562769bb6ce5d4d609fbb45455a7a2f756167b8cdcdb75887fc"
+    env:
+      GHIDRA_VERSION: ${{ matrix.ghidra_version }}
+      GHIDRA_BUILD_DATE: ${{ matrix.ghidra_build_date }}
+      GHIDRA_SHA256: ${{ matrix.ghidra_sha256 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -23,7 +54,7 @@ jobs:
       - run: ./gradlew build
       - uses: actions/upload-artifact@v4
         with:
-          name: distribution
+          name: GhidraBoy_Ghidra_${{ matrix.ghidra_version }}
           path: build/distributions/*_GhidraBoy.zip
           if-no-files-found: 'error'
   release:
@@ -36,11 +67,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-        with:
-          name: distribution
       - name: Create release and upload distribution
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create --verify-tag --generate-notes --draft "${{ github.ref_name }}"
-          gh release upload "${{ github.ref_name }}" *_GhidraBoy.zip
+          gh release upload "${{ github.ref_name }}" GhidraBoy_Ghidra_*/*.zip
