@@ -247,7 +247,13 @@ class DecompilerTest : IntegrationTest() {
                 byte bVar2;
                 P1 = 0x20;
                 bVar1 = P1;
+                bVar1 = P1;
                 P1 = 0x10;
+                bVar2 = P1;
+                bVar2 = P1;
+                bVar2 = P1;
+                bVar2 = P1;
+                bVar2 = P1;
                 bVar2 = P1;
                 P1 = 0x30;
                 return ~bVar2 & 0xf | ~bVar1 << 4;
