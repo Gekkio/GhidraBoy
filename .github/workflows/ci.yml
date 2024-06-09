@@ -11,6 +11,15 @@ jobs:
     strategy:
       matrix:
         include:
+          - ghidra_version: "11.0.3"
+            ghidra_build_date: "20240410"
+            ghidra_sha256: "2462a2d0ab11e30f9e907cd3b4aa6b48dd2642f325617e3d922c28e752be6761"
+          - ghidra_version: "11.0.2"
+            ghidra_build_date: "20240326"
+            ghidra_sha256: "4f16ae3f288f8c01fd1872e8e55b25c79744e7b1e8a9383c5e576668ca7d1906"
+          - ghidra_version: "11.0.1"
+            ghidra_build_date: "20240130"
+            ghidra_sha256: "a0bc9450aa3a231096b13a823c66311b9f84cb9cec4624393221cfed40ef6924"
           - ghidra_version: "11.0"
             ghidra_build_date: "20231222"
             ghidra_sha256: "f1f240f91cf6b1dffc9a4148384ee3c6b269a8ae27c6f981577973e00043ad94"
