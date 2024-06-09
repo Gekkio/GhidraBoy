@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.BASIC_ISO_DATE
@@ -18,8 +19,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "1.9.21"
-    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+    kotlin("jvm") version "2.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
 repositories {
@@ -42,9 +43,9 @@ java {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        optIn.add("kotlin.ExperimentalUnsignedTypes")
     }
 }
 
@@ -60,7 +61,7 @@ dependencies {
 
     testImplementation(ghidraJars)
     testImplementation(kotlin("stdlib-jdk8"))
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
