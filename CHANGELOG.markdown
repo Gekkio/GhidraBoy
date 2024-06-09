@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 20240609 - 2024-06-09
+
+### Changed
+
+- Build with Ghidra 11.1
+- Drop support for older Ghidra versions due to decompiler behaviour change
+
 ## 20231227 - 2023-12-27
 
 ### Changed
