@@ -2,7 +2,17 @@
 
 **Very experimental! No compatibility guarantees!**
 
-Ghidra version: Ghidra 11.0_PUBLIC_20231222
+Supported Ghidra versions:
+
+- 11.0.3
+- 11.0.2
+- 11.0.1
+- 11.0
+- 10.4
+- 10.3.3
+- 10.3.2
+- 10.3.1
+- 10.3
 
 ![Tetris disassembly](screenshot.png)
 
