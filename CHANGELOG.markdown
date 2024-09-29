@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Build with Java 21
+
 ## 20240711 - 2024-07-11
 
 ### Changed
