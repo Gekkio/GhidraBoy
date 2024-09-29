@@ -9,6 +9,7 @@ import fi.gekkio.ghidraboy.withTransaction
 import ghidra.app.decompiler.DecompInterface
 import ghidra.app.plugin.assembler.Assemblers
 import ghidra.app.util.importer.MessageLog
+import ghidra.framework.Application
 import ghidra.program.database.ProgramDB
 import ghidra.program.model.address.Address
 import ghidra.program.model.address.AddressSet
@@ -114,7 +115,21 @@ class DecompilerTest : IntegrationTest() {
             )
         assertDecompiled(
             f,
+            when (Application.getApplicationVersion()) {
+                "11.2" ->
+                    """
+            void memcpy(byte *dst,byte *src,word len)
+            {
+                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
+                    *dst = *src;
+                    src = src + 1;
+                    dst = dst + 1;
+                }
+                return;
+            }
             """
+                else ->
+                    """
             void memcpy(byte *dst,byte *src,word len)
             {
                 for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
@@ -124,7 +139,8 @@ class DecompilerTest : IntegrationTest() {
                 }
                 return;
             }
-            """.trimIndent(),
+            """
+            },
         )
     }
 
@@ -153,7 +169,20 @@ class DecompilerTest : IntegrationTest() {
             )
         assertDecompiled(
             f,
+            when (Application.getApplicationVersion()) {
+                "11.2" ->
+                    """
+            void memset(byte *dst,byte val,word len)
+            {
+                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
+                    *dst = val;
+                    dst = dst + 1;
+                }
+                return;
+            }
             """
+                else ->
+                    """
             void memset(byte *dst,byte val,word len)
             {
                 for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
@@ -162,7 +191,8 @@ class DecompilerTest : IntegrationTest() {
                 }
                 return;
             }
-            """.trimIndent(),
+            """
+            },
         )
     }
 
@@ -375,7 +405,8 @@ class DecompilerTest : IntegrationTest() {
         returnParam: Parameter? = null,
     ): Function =
         program.withTransaction {
-            val instructions: Iterable<Instruction> = Assemblers.getAssembler(program).assemble(address, *code.lines().toTypedArray())
+            val instructions: Iterable<Instruction> =
+                Assemblers.getAssembler(program).assemble(address, *code.lines().toTypedArray())
             val addressSet = AddressSet()
             for (instruction in instructions) {
                 addressSet.add(instruction.minAddress, instruction.maxAddress)
