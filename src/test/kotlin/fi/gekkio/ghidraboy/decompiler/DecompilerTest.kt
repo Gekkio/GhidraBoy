@@ -116,11 +116,11 @@ class DecompilerTest : IntegrationTest() {
         assertDecompiled(
             f,
             when (Application.getApplicationVersion()) {
-                "11.2" ->
+                "11.1", "11.1.1", "11.1.2" ->
                     """
             void memcpy(byte *dst,byte *src,word len)
             {
-                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
+                for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
                     *dst = *src;
                     src = src + 1;
                     dst = dst + 1;
@@ -132,7 +132,7 @@ class DecompilerTest : IntegrationTest() {
                     """
             void memcpy(byte *dst,byte *src,word len)
             {
-                for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
+                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
                     *dst = *src;
                     src = src + 1;
                     dst = dst + 1;
@@ -170,11 +170,11 @@ class DecompilerTest : IntegrationTest() {
         assertDecompiled(
             f,
             when (Application.getApplicationVersion()) {
-                "11.2" ->
+                "11.1", "11.1.1", "11.1.2" ->
                     """
             void memset(byte *dst,byte val,word len)
             {
-                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
+                for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
                     *dst = val;
                     dst = dst + 1;
                 }
@@ -185,7 +185,7 @@ class DecompilerTest : IntegrationTest() {
                     """
             void memset(byte *dst,byte val,word len)
             {
-                for (; (byte)((byte)(len >> 8) | (byte)len) != 0; len = len - 1) {
+                for (; (char)(len >> 8) != '\0' || (char)len != '\0'; len = len - 1) {
                     *dst = val;
                     dst = dst + 1;
                 }

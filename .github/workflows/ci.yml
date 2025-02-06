@@ -23,6 +23,9 @@ jobs:
           - ghidra_version: "11.2"
             ghidra_build_date: "20240926"
             ghidra_sha256: "a98fe01038fe8791c54b121ede545ea799d26358794d7c2ac09fa3f5054f3cdc"
+          - ghidra_version: "11.3"
+            ghidra_build_date: "20250205"
+            ghidra_sha256: "73b42cec587f370bfef49809ae55d2c7a3db689e8f164a1e7d7b8de295b6359f"
     env:
       GHIDRA_VERSION: ${{ matrix.ghidra_version }}
       GHIDRA_BUILD_DATE: ${{ matrix.ghidra_build_date }}
