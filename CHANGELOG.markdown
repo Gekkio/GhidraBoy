@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Add support for Ghidra 11.3.1
+
 ## 20250206 - 2025-02-06
 
 ### Changed
