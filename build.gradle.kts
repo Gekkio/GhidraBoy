@@ -19,8 +19,8 @@ import java.util.Properties
 
 plugins {
     java
-    kotlin("jvm") version "2.1.20"
-    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
+    kotlin("jvm") version "2.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
 }
 
 repositories {
@@ -140,5 +140,5 @@ tasks.named<Test>("test") {
 defaultTasks("clean", "assemble")
 
 ktlint {
-    setVersion("1.5.0")
+    setVersion("1.6.0")
 }
