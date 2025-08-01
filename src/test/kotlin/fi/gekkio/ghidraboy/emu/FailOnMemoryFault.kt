@@ -19,7 +19,9 @@ import ghidra.pcode.memstate.MemoryFaultHandler
 import ghidra.program.model.address.Address
 import org.junit.jupiter.api.Assertions
 
-class FailOnMemoryFault(private val emulator: EmulatorHelper) : MemoryFaultHandler {
+class FailOnMemoryFault(
+    private val emulator: EmulatorHelper,
+) : MemoryFaultHandler {
     override fun uninitializedRead(
         address: Address,
         size: Int,

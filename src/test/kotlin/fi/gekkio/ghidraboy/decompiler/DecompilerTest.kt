@@ -437,12 +437,15 @@ class DecompilerTest : IntegrationTest() {
         }
 
     private fun decompile(function: Function) =
-        decompiler.decompileFunction(function, 10, TaskMonitor.DUMMY).also {
-            assertTrue(it.decompileCompleted()) { "Decompilation did not complete" }
-        }.decompiledFunction.c
+        decompiler
+            .decompileFunction(function, 10, TaskMonitor.DUMMY)
+            .also {
+                assertTrue(it.decompileCompleted()) { "Decompilation did not complete" }
+            }.decompiledFunction.c
 
     private fun formatCode(code: String) =
-        code.lineSequence()
+        code
+            .lineSequence()
             .map { it.trim() }
             .filter { it.isNotEmpty() }
             .joinToString(separator = "\n")

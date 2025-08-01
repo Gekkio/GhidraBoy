@@ -91,10 +91,12 @@ val compileSleigh by tasks.registering(JavaExec::class) {
     val slaspecFile = file("data/languages/sm83.slaspec")
     val slaFile = file("data/languages/sm83.sla")
 
-    inputs.files(fileTree("data/languages").include("*.slaspec", "*.sinc"))
+    inputs
+        .files(fileTree("data/languages").include("*.slaspec", "*.sinc"))
         .withPropertyName("sourceFiles")
         .withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.files(slaFile)
+    outputs
+        .files(slaFile)
         .withPropertyName("outputFile")
 
     classpath = sleigh

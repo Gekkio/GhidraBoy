@@ -31,9 +31,10 @@ open class IntegrationTest {
         val provider = SleighLanguageProvider.getSleighLanguageProvider()
         Assertions.assertFalse(provider.hadLoadFailure())
         val languageDescription =
-            provider.languageDescriptions.filter {
-                it.description == "Sharp SM83" && it.processor.toString() == "SM83"
-            }.single()
+            provider.languageDescriptions
+                .filter {
+                    it.description == "Sharp SM83" && it.processor.toString() == "SM83"
+                }.single()
         language = provider.getLanguage(languageDescription.languageID)
     }
 

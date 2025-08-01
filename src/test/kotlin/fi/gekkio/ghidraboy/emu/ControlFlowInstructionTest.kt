@@ -204,7 +204,10 @@ private class Conditions : ArgumentsProvider {
         Condition.values().flatMap { listOf(Arguments.of(it, false), Arguments.of(it, true)) }.stream()
 }
 
-enum class Rst(val opcode: UByte, val target: UShort) {
+enum class Rst(
+    val opcode: UByte,
+    val target: UShort,
+) {
     Rst00(0xc7u, 0x0000u),
     Rst08(0xcfu, 0x0008u),
     Rst10(0xd7u, 0x0010u),
