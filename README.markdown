@@ -4,6 +4,7 @@
 
 Supported Ghidra versions:
 
+- 11.4.1
 - 11.3.2
 - 11.3.1
 - 11.3
